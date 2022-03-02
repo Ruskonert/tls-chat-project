@@ -1,0 +1,81 @@
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  margin: 0;
+}
+
+.container {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  position: absolute;
+  display: flex;
+  margin-left: auto;
+  margin-right: auto;
+  width: 1000px;
+  height: 850px;
+  background-color: whitesmoke;
+  flex-wrap: wrap;
+  align-content: stretch;
+}
+
+.chat-container {
+  overflow-y: auto;
+  flex-direction: column;
+  min-height: 700px;
+  max-height: 700px;
+  width: 600px;
+  margin: 20px;
+  background-color: #FFFFFF;
+  border: 1px solid rgb(202, 198, 198);
+  border-radius: 10px;
+}
+
+.chat-content {
+  margin-right: 10px;
+  margin-left: 10px;
+  word-break: break-all;
+}
+
+.player-content {
+  margin: 20px;
+}
+
+.player-content:hover {
+  cursor: pointer;
+}
+
+.chat-content p {
+  margin: 0;
+}
+
+.player-container {
+  margin: 20px;
+  width: 315px;
+  background-color: #FFFFFF;
+  border: 1px solid rgb(202, 198, 198);
+  min-height: 700px;
+  max-height: 700px;
+  border-radius: 10px;
+}
+
+.controller {
+  width: 1000px;
+  height: 70px;
+  margin: 20px;
+  border: 1px solid rgb(202, 198, 198);
+  border-radius: 10px;
+  background-color: #FFFFFF;
+}
+
+.desc {
+  margin-top: 5px;
+  text-align: center;
+}
+
+hr {
+  color: rgb(224, 224, 224);
+  margin-left: 10px;
+  margin-right: 10px;
+}

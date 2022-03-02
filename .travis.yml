@@ -1,0 +1,24 @@
+language: c
+os: linux
+compiler:
+  - gcc
+before_install:
+  - sudo apt-get update
+  - sudo apt-get -y install libssl-dev cmake
+  - git clone https://github.com/openssl/openssl
+  - git clone https://github.com/json-c/json-c
+  - cd openssl
+  - ./Configure
+  - sudo make
+  - sudo make install
+  - cd ..
+  - cd json-c
+  - mkdir build
+  - cd build
+  - cmake ..
+  - sudo make
+  - sudo make install
+  - cd ../../
+  - sudo ldconfig /usr/local/lib64
+script:
+  - make
