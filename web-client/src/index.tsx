@@ -1,23 +1,30 @@
-import React from 'react';
 import axios from "axios";
-import { useEffect } from 'react';
+import { Fragment, useEffect } from 'react';
 import ReactDOM from 'react-dom';
+import * as net from 'net';
+
 import './index.css';
 
-function App2() {
-    const callApi = async()=>{
-      axios.get("/api").then((res)=>{console.log(res.data.test)});
-    };
-  
-    useEffect(()=>{
-      callApi();
-    }, []);
-    
-    return (
-      <div className="App">
-      ...
-      </div>
-    );
-  }
+async function renderChatMessage() {
+    await axios.get("http://localhost:9999/").then(res => {
+        var chatMessage : string[] = res.data.message;
+        const ChatContainer = (
+            <Fragment>
+                <div className="desc">채팅 창</div>
+                <hr />
+                {chatMessage.map(item => 
+                <div className="chat-content">
+                    <p>{item}</p>
+                </div>
+                )}
+                <script>
+                    objDiv = document.getElementById('chat-container');
+                    objDiv.scrollTop = objDiv.scrollHeight;
+                </script>
+            </Fragment>
+        );
+        ReactDOM.render(ChatContainer, document.getElementById('chat-container'));
+    });
+}
 
-ReactDOM.render(<App2 />, document.getElementById('root'));
+setInterval(renderChatMessage, 1000);

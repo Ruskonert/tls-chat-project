@@ -611,6 +611,12 @@ void* wait_for_new_user(void* argv)
 
         // 접속한 클라이언트 데이터에 기반하여, 서버에서 관리하기 위한 유저 컨텍스트 정보를 생성합니다.
         user = start_communicate_user(ctx, user_sd, (struct sockaddr*)&c_addr);
+        if(user == (User*)-1) {
+            output_message(MSG_ERROR, NULL, ctx->_message_mutex, "Some of client was connected, but SSL service is invaild\n");
+            close(user_sd);
+            continue;
+        }
+
         user->_alloc = idx;
 
         // 랜덤 닉네임 생성

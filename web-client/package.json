@@ -19,7 +19,7 @@
   },
   "scripts": {
     "start": "npm-run-all -p client react_start",
-    "client": "ts-node src/Client.ts",
+    "client": "ts-node src/client.ts",
     "react_start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

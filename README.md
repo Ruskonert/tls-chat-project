@@ -1,5 +1,5 @@
 # 채팅 프로그램
-[![Build Status](https://app.travis-ci.com/Ruskonert/tls-chat-program.svg?branch=master)](https://app.travis-ci.com/Ruskonert/tls-chat-program)<br />
+[![Build Status](https://app.travis-ci.com/Ruskonert/tls-chat-project.svg?branch=main)](https://app.travis-ci.com/Ruskonert/tls-chat-project)<br />
 이 프로젝트에서는 C언어를 복습하고, 활용 능력을 향상시키기 위한 목적으로 수행하였으며, OpenSSL 및 비동기 소켓 기반의 채팅 서버, 클라이언트를 개발합니다.<br /><br />
 최종 업데이트 날짜 2022.03.02<br /><br />
 <img src="screenshot.png" alt="drawing"/>

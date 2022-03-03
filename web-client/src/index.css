@@ -20,7 +20,7 @@ body {
   align-content: stretch;
 }
 
-.chat-container {
+#chat-container {
   overflow-y: auto;
   flex-direction: column;
   min-height: 700px;
@@ -50,7 +50,7 @@ body {
   margin: 0;
 }
 
-.player-container {
+#player-container {
   margin: 20px;
   width: 315px;
   background-color: #FFFFFF;

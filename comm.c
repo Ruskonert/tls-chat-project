@@ -171,7 +171,6 @@ Message* packing_message_convert(char* buffer, int bytes)
     if(bytes <= 0) return (Message*)-1;
     if(bytes >= 0 && bytes < 8) return (Message*)-1;
 
-
     char* magic_number = substring(buffer, 1, 4);
     if ( strcmp(MAGIC_NUMBER, magic_number) != 0) {
         free(magic_number);
