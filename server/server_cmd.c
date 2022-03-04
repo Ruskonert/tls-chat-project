@@ -198,8 +198,8 @@ int cmd_change_name(void* ctx, Message* message)
 
     output_message(MSG_COMMAND, get_user_conn(user), mutex, "Nickname changed [%s] -> [%s]\n", get_user_name(user), packing_message_string(message));
 
+    sprintf(buf, "%s 님이 닉네임을 다음과 같이 변경하였습니다 - [%s]", get_user_name(user), packing_message_string(message));
     set_user_name(user, packing_message_string(message));
-    sprintf(buf, "닉네임을 변경하였습니다 - [%s]", packing_message_string(message));
     Message* c_message = packing_message_create(1, strlen(buf), buf);
 
     return cmd_broadcast_message(user, c_message);
