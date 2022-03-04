@@ -1,7 +1,7 @@
 # 채팅 프로그램
-[![Build Status](https://app.travis-ci.com/Ruskonert/tls-chat-project.svg?branch=main)](https://app.travis-ci.com/Ruskonert/tls-chat-project)<br />
+[![Build Status](https://app.travis-ci.com/Ruskonert/tls-chat-project.svg?branch=master)](https://app.travis-ci.com/Ruskonert/tls-chat-project)<br />
 이 프로젝트에서는 C언어를 복습하고, 활용 능력을 향상시키기 위한 목적으로 수행하였으며, OpenSSL 및 비동기 소켓 기반의 채팅 서버, 클라이언트를 개발합니다.<br /><br />
-최종 업데이트 날짜 2022.03.02<br /><br />
+최종 업데이트 날짜 2022.03.04<br /><br />
 <img src="screenshot.png" alt="drawing"/>
 # 주요 기능
 - 비동기 소켓 기반으로 설계되어 여러 명이 대화할 수 있으며, 한 서버에 최대 64명까지 접속 가능합니다.
@@ -136,6 +136,7 @@
 | <code>Makefile</code> | 프로젝트 컴파일을 위한 make 파일입니다. |
 
 # 설치 및 컴파일
+서버 및 클라이언트(콘솔) 컴파일 방안은 다음과 같습니다.
 ```shell
 # complie and install openssl
 git clone https://github.com/openssl/openssl.git
@@ -152,6 +153,11 @@ sudo apt-get install libssl-dev
 
 # cd ~/tls-chat-example
 make
+```
+웹 클라이언트 실행을 위한 설치 방안은 다음과 같습니다.
+```shell
+cd web-client
+
 ```
 
 # 사용 방법
@@ -170,7 +176,9 @@ sudo ./proc_server <port>
 [이슈 사항 보기](/issues.md)
 
 # 개발 환경
-- Ubuntu 18.04 64-bit
+- Ubuntu 18.04 64-bit (WSL2)
 - GCC (C11)
 - OpenSSL 3.1.0-dev
+- vscode
 - libssl-dev:amd4 1.1.1-1ubuntu2.1~18.04.7
+- node v17.6 (npm v8.5.2, yarn 1.22.17)
