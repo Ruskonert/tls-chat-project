@@ -60,7 +60,8 @@ body {
   border-radius: 10px;
 }
 
-.controller {
+#controller {
+  position: relative;
   width: 1000px;
   height: 70px;
   margin: 20px;
@@ -78,4 +79,39 @@ hr {
   color: rgb(224, 224, 224);
   margin-left: 10px;
   margin-right: 10px;
+}
+
+.controller-txt-area {
+  width: 783px;
+  margin-top: 10px;
+  margin-left: 10px;
+  font-family: 'Noto Sans KR', monospace;
+  height: auto;
+  padding: 5px;
+  resize: none;
+  border: 1px solid rgb(202, 198, 198);
+  border-radius: 10px;
+}
+
+.controller-submit-btn {
+  font-family: 'Noto Sans KR', monospace;
+  width: 130px;
+  height: 50px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  margin-left: 10px;
+  border: 1px solid rgb(202, 198, 198);
+  background-color: #d3d3d3;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.controller-submit-btn p {
+  margin: 0;
+}
+
+.controller-submit-btn:hover {
+  background-color: rgb(236, 229, 229);
+  cursor: pointer;
 }
