@@ -1,0 +1,29 @@
+{
+    "files.associations": {
+        "pthread.h": "c",
+        "stdlib.h": "c",
+        "server_status.h": "c",
+        "server_util.h": "c",
+        "server_comm.h": "c",
+        "ssl3.h": "c",
+        "server_net.h": "c",
+        "types.h": "c",
+        "client_comm.h": "c",
+        "ssl.h": "c",
+        "opensslconf.h": "c",
+        "macros.h": "c",
+        "type_traits": "c",
+        "comm.h": "c",
+        "util.h": "c",
+        "server_main.h": "c",
+        "server_broad.h": "c",
+        "typeinfo": "c",
+        "connection.h": "c",
+        "stdbool.h": "c",
+        "json.h": "c",
+        "json_object.h": "c",
+        "printbuf.h": "c",
+        "json_types.h": "c"
+    },
+    "git.ignoreLimitWarning": true
+}
