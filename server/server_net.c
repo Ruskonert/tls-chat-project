@@ -487,8 +487,11 @@ int create_broad_session_job (ConnectManager* server_ctx, char* host_ip, int por
     ConnectManager* broad_cm_ctx = connect_manager_create(false);
     Connection* server_broad_conn = get_connect_manager_of_conn(broad_cm_ctx);
 
+    pthread_mutex_t* broad_conn_mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+    pthread_mutex_init(broad_conn_mutex, NULL);
+    
     broad_cm_ctx->_message_mutex = server_ctx->_message_mutex;
-    broad_cm_ctx->_mutex = server_ctx->_mutex;
+    broad_cm_ctx->_mutex = broad_conn_mutex;
     broad_cm_ctx->_user_arr = server_ctx->_user_arr;
 
     SOCKET_HANDLE sd = socket(PF_INET, SOCK_STREAM, 0);
@@ -541,7 +544,7 @@ int create_broad_session_job (ConnectManager* server_ctx, char* host_ip, int por
             }
         }
         if (user == (User*)-1) {
-            output_message(MSG_CONNECTION, NULL, broad_cm_ctx->_message_mutex, "Closed connection for broadcasting -> %s:%d\n", user_ip, port);
+            output_message(MSG_CONNECTION, NULL, broad_cm_ctx->_message_mutex, "Invaild requested, closed connection for broadcasting -> %s:%d\n", user_ip, port);
             close(user_sd);
         }
     }

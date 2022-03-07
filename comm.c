@@ -81,6 +81,7 @@ Message* schedule_message_origin(ScheduleMessage* message)
 
 void schedule_message_increase(ScheduleMessage* message)
 {
+    if(message == 0) return;
     message->_current += 1;
     if(message->_max <= message->_current) {
         schedule_message_free(message, message->_depend);

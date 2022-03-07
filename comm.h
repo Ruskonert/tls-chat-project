@@ -56,7 +56,6 @@
 #define USER_STATUS_NOT_ESTABLISHED         -1    /* 연결 아직 안됨 */
 #define USER_STATUS_CONNECTION_ESTATISHED    1    /* TLS 핸드쉐이크 성공, 클라이언트 검증 안됨 */
 #define USER_STATUS_JOINED_SERVER            2    /* 서버 접속 성공, 클라이언트 검증 완료  */
-#define USER_STATUS_JOINED_AND_WAIT_MESSAGE  3    /* 서버 접속 성공, 브로드캐스트 메시지 대기중  */
 #define USER_STATUS_DISCONNECTED             998  /* 연결 종료 */
 #define USER_STATUS_SUSPEND                  999  /* 연결 종료 대기를 위한 세션 일시중지 */
 

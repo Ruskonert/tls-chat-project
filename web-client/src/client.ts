@@ -40,27 +40,24 @@ const inputMessageStream : tls.TLSSocket = tls.connect(4433, options, () => {
 
     var message : PackingMessage = PackingMessage.ConvertMessage(1, "");
     broadcastStream.write(message.toString(), 'binary');
-    broadcastStream.read();
   });
 
   broadcastStream.on('data', (data : Buffer) => {
     var str = Buffer.from(data).toString();
-    console.log("Message Received: " +  str.substring(12));
+    console.log("Broadcast message received: " +  str.substring(12));
   
     recvMessage.push(str.substring(12));
     recvMessageSize = recvMessage.length;
   
     var message : PackingMessage = PackingMessage.ConvertMessage(1, "");
     broadcastStream.write(message.toString(), 'binary');
-    broadcastStream.read();
   });
-
 });
 
 
 inputMessageStream.setEncoding('utf8');
 inputMessageStream.on('data', (data : Buffer) => {
-  console.log(`Response data: ${data}`);
+  console.log(`Clinet response data: ${data}`);
 });
 
 

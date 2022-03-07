@@ -1,13 +1,15 @@
 # 발견된 주요 이슈
-이 문서는 프로젝트를 진행하면서 발견된 주요 문제들을 기술합니다. 
+이 문서는 프로젝트를 진행하면서 발견된 주요 문제들을 기술합니다. 해결된 사항은 ✅, 여전히 해결이 필요한 사항은 ❌을 기재합니다.  
 
-## 1.클라이언트 재연결에 관한 문제 (solved)
+## 클라이언트 재연결에 관한 문제 ✅
 (증상) 클라이언트가 연결을 종료한 후, 다시 연결하려고 하면 연결이 안되는 현상이 발생함.<br />
 (원인) close() 함수가 클라이언트에서 호출이 안되어, 서버에서 CLOSE_WAIT로 무한히 대기중이라서 연결이 안됨. <br />
+<img src="images/close-wait-issue.png" alt="drawing"/>
+
 (해결방안) 클라이언트 측 프로그램의 close() 함수 호출을 통해 클라이언트가 연결을 닫아서 해결함.<br />
 <br />
 
-## 2.현재 인원 출력에 관한 문제 (solved)
+## 현재 인원 출력에 관한 문제 ✅ 
 (증상) 인원 정보가 8명까지만 출력되는 문제점이 발생함. <br />
 (원인) Packing Message를 생성하는 루틴이 문제가 있었음. 메시지 길이를 최대 255까지만 설정되어 긴 메세지가 잘리는 현상이 존재하였음. 즉, 포맷 스트링을 잘못 기재함.<br />
 ```c
@@ -31,7 +33,7 @@ char* packing_message_to_string(int type, int len, char* message)
 ```
 <br />
 
-## 3.브로드캐스트에 대한 램 누수 문제
+## 브로드캐스트에 대한 램 누수 문제 ❌
 (증상) 메시지를 다른 유저에게 브로드캐스트한 후, 메시지에 대한 램 할당이 해지되지 않고 사용량이 계속 늘어남.<br />
 (원인) <code>server_cmd.c</code> 파일에서 <code>cmd_broadcast_message</code>함수 내에 있는 아래 코드가 원인임.<br />
 ```c
@@ -44,7 +46,7 @@ thread 자원이 여전히 잔여함에 따라 (8바이트), 작업이 끝났음
 (해결방안) 쓰레드 자원을 동적으로 할당해서 동작시키고, 동작이 종료되면 자원 할당을 헤제해주는 개별 루틴이 필요함. <br />
 <br />
 
-## 4.클라이언트 및 메시지 리시버가 연결된 후, 메시지 리시버가 강제 종료 시 프로그램이 정지하는 문제 (solved)
+## 클라이언트 및 메시지 리시버가 연결된 후, 메시지 리시버가 강제 종료 시 프로그램이 정지하는 문제 ✅
 (증상) 서버로부터 메시지가 오면, <code>send_broad_message</code> 함수에서 SSL_read 함수 호출시 "Broken pipe" 오류가 발생하면서 프로그램이 정지됨. <br />
 (원인) 메시지 리시버가 일방적으로 수신만 하기 때문에 문제가 발생함. <br />
 (해결방안) 본래 메시지만 받기 위해 메시지 리시버를 하나의 서버 형태로 개발해 포트 개방과 같은 추가적인 문제도 존재하였음. 이에 클라이언트 형태로 코드를 전환하였으며, <code>client_broad.c</code> 및 <code>server_broad.c</code> 파일을 수정함<br />
@@ -54,12 +56,6 @@ thread 자원이 여전히 잔여함에 따라 (8바이트), 작업이 끝났음
 void* communicate_broad_user(void* argv)
 {
     ...
-    output_message(MSG_CONNECTION, conn, message_mutex, "Connected the broadcast channel\n");
-
-    set_conn_status(broad_conn, USER_STATUS_JOINED_SERVER);
-
-    show_certs(ctx, user_broad_session);
-
     signal(SIGPIPE, SIG_IGN); // <-- 시그널에 대한 핸들러 추가
     ...
 }
@@ -67,7 +63,7 @@ void* communicate_broad_user(void* argv)
 
 <br />
 
-## 5.클라이언트 Stack smashing 문제 (solved)
+## 클라이언트 Stack smashing 문제 ✅
 (증상) 클라이언트가 연결을 끊는 명령어를 수행한 뒤, Stack smashing exception 문제가 발생함. <br />
 
 ```log
@@ -93,7 +89,7 @@ void* communicate_broad_user(void* argv)
         memset(buf, 0, MAX_LENGTH_STR_MESSAGE); // after
 ```
 
-## 6. 메시지 전송이 안되는 문제 (solved)
+## 메시지 전송이 안되는 문제 ✅
 (증상) 현재 접속한 유저에 브로드캐스트 메시지를 전송할 떄, 일정 확률로 메시지가 전송되지 않거나, 한 유저에게만 메시지가 2개 이상 전송되는 문제가 발생함. <br />
 <img src="images/issue.png" alt="drawing"/>
 
@@ -112,7 +108,6 @@ void* communicate_broad_user(void* argv)
         a_list->user = o_user;
         a_list->message = s_message;
 
-        output_message(MSG_INFO, NULL, mutex, "Sending the broadcasting message %s\n", get_user_name(o_user));
         pthread_create(&thread, NULL, broad_send_message, (void*)a_list);
 ```
 

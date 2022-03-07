@@ -69,7 +69,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceRoot}/proc_server",
-            "miDebuggerServerAddress": "localhost:9999",
+            "miDebuggerServerAddress": "localhost:9990",
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
             "environment": [],

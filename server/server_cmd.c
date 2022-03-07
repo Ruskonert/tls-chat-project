@@ -79,8 +79,6 @@ int cmd_broadcast_message(void* ctx, Message* message)
 
         a_list->user = o_user;
         a_list->message = s_message;
-
-        output_message(MSG_INFO, NULL, mutex, "Sending the broadcasting message %s\n", get_user_name(o_user));
         pthread_create(&thread, NULL, broad_send_message, (void*)a_list);
     }
     return RESPONSE_CONN_OK;

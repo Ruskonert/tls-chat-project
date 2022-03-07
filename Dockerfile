@@ -5,10 +5,21 @@ FROM ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
 RUN sed -i 's/archive.ubuntu.com/mirror.kakao.com/g' /etc/apt/sources.list \
     && apt-get update && apt-get install -y \
-    gcc gdb git libssl-dev make net-tools \
+    gcc gdb git libssl-dev make net-tools cmake \
     && rm -rf /var/lib/apt/lists/*
 
 RUN git clone https://github.com/openssl/openssl
+RUN git clone https://github.com/json-c/json-c
+
+WORKDIR /json-c
+
+RUN ["mkdir", "build"]
+
+WORKDIR /json-c/build
+
+RUN ["cmake", ".."]
+RUN ["make", "-j8"]
+RUN ["make", "install", "-j8"]
 
 WORKDIR /openssl
 
@@ -27,7 +38,7 @@ RUN ["make"]
 RUN ["ldconfig", "/usr/local/lib64"]
 
 # 서버 전용 이미지 제작 시 하단 코드를 주석 처리 혹은 삭제가 필요합니다.
-ENTRYPOINT ["./proc_client", "172.17.0.2", "4433"]
+# ENTRYPOINT ["./proc_client", "172.17.0.2", "4433"]
 
 # 원격 디버깅
 # ENTRYPOINT ["gdbserver", "0.0.0.0:9091", "./proc_server"]
