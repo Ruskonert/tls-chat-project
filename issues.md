@@ -92,3 +92,28 @@ void* communicate_broad_user(void* argv)
         memset(buf, 0, MAX_LENGTH_MESSAGE); // before
         memset(buf, 0, MAX_LENGTH_STR_MESSAGE); // after
 ```
+
+## 6. 메시지 전송이 안되는 문제 (solved)
+(증상) 현재 접속한 유저에 브로드캐스트 메시지를 전송할 떄, 일정 확률로 메시지가 전송되지 않거나, 한 유저에게만 메시지가 2개 이상 전송되는 문제가 발생함. <br />
+<img src="images/issue.png" alt="drawing"/>
+
+(원인) <code>broad_send_message</code>에 대한 쓰레드 함수를 호출하기 전, 유저 컨텍스트 데이터와 메시지 데이터를 넘겨 주는데, 넘겨 주는 방식을 지역 변수 값에 담아 넘겨주는 방식을 사용했음. 이로 인해 쓰레드 간 safety가 보장되지 못해 쓰레드에 넘겨준 지역 변수 값이 안정적으로 assign될 수 없음
+```c
+        pthread_t thread;
+        void* a_list[] = {o_user, s_message}; // problem!!
+
+        pthread_create(&thread, NULL, broad_send_message, (void*)a_list);
+```
+
+(해결방안) 쓰레드에 인자를 안전하게 전달하기 위해, 인자 전달을 위한 구조체를 구현하였으며, <code>server_cmd.c</code> 내 <code>cmd_broadcast_message</code> 함수에서 코드를 다음과 같이 수정함<br />
+```c
+        struct broad_arg_t* a_list = (struct broad_arg_t*)malloc(sizeof(struct broad_arg_t));
+
+        a_list->user = o_user;
+        a_list->message = s_message;
+
+        output_message(MSG_INFO, NULL, mutex, "Sending the broadcasting message %s\n", get_user_name(o_user));
+        pthread_create(&thread, NULL, broad_send_message, (void*)a_list);
+```
+
+상세 사항은 해당 URL를 참고: https://github.com/Ruskonert/tls-chat-project/commit/d2d131657575a4b19abb7776012ed790cd25a787<br />
