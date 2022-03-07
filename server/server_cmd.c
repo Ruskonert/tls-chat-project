@@ -40,6 +40,12 @@ int send_ack_packing_message(User* user, Message* message)
     return status;
 }
 
+struct broad_arg_t
+{
+    User* user;
+    ScheduleMessage* message;
+};
+
 
 // 현재 서버에 접속하고 있는 모든 인원에게 특정 메시지를 전송할 떄 실행됩니다.
 int cmd_broadcast_message(void* ctx, Message* message)
@@ -53,7 +59,7 @@ int cmd_broadcast_message(void* ctx, Message* message)
     ConnectManager* cm = get_user_connect_manager(user);
     User** connected_user_arr = get_connect_manager_user(cm);
 
-    char buf[MAX_LENGTH_MESSAGE] = {0.};
+    char buf[MAX_LENGTH_MESSAGE] = {0,};
     memset(buf, 0, MAX_LENGTH_MESSAGE);
 
     sprintf(buf, "[%s]: %s", get_user_name(user), packing_message_string(message));
@@ -66,14 +72,15 @@ int cmd_broadcast_message(void* ctx, Message* message)
 
         if(o_user == 0) continue;
         if(! is_user_joined_server(o_user)) continue;
-        if(get_user_broad_conn(o_user) == 0) {
-            schedule_message_increase(s_message);
-            continue;
-        }
         
         pthread_t thread;
-        void* a_list[] = {o_user, s_message};
 
+        struct broad_arg_t* a_list = (struct broad_arg_t*)malloc(sizeof(struct broad_arg_t));
+
+        a_list->user = o_user;
+        a_list->message = s_message;
+
+        output_message(MSG_INFO, NULL, mutex, "Sending the broadcasting message %s\n", get_user_name(o_user));
         pthread_create(&thread, NULL, broad_send_message, (void*)a_list);
     }
     return RESPONSE_CONN_OK;
@@ -275,7 +282,7 @@ int cmd_secret_message(void* ctx, Message* message)
                     return RESPONSE_CONN_SKIP;
                 }
 
-                sprintf(buf, "(1:1 메시지) [%s/%s]: %s", get_conn_ip_addr(conn), get_user_name(user), send_message);
+                sprintf(buf, "(1:1 메시지) [%s]: %s", get_user_name(user), send_message);
 
                 Message* c_message = packing_message_create(1, strlen(buf), buf);
                 ScheduleMessage* s_message = schedule_message_create(get_current_joined_user(cm), true, c_message);
