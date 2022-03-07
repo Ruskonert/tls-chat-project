@@ -219,7 +219,7 @@ bool is_user_joined_server(User* user)
 {
     if(user == 0) return false;
     if(user->conn == 0) return false;
-    return get_conn_status(user->conn) == USER_STATUS_JOINED_SERVER;
+    return get_conn_status(user->conn) >= USER_STATUS_JOINED_SERVER;
 }
 
 
@@ -520,6 +520,7 @@ int create_broad_session_job (ConnectManager* server_ctx, char* host_ip, int por
 
         SOCKET_HANDLE user_sd = accept(sd, (struct sockaddr*)&user_addr, &len);
         const char* user_ip = inet_ntoa(((struct sockaddr_in *)&user_addr)->sin_addr);
+        output_message(MSG_CONNECTION, NULL, broad_cm_ctx->_message_mutex, "Tried to connect the broadcast channel from %s\n", user_ip);
 
         User* user = -1;
 
@@ -530,6 +531,7 @@ int create_broad_session_job (ConnectManager* server_ctx, char* host_ip, int por
                 Connection* user_conn = get_user_conn(o_user);
                 const char* ip = get_conn_ip_addr(user_conn);
 
+                // IP가 일치하면, 현재 클라이언트가 연결되어 있음을 의미합니다.
                 if(strcmp(ip, user_ip) == 0) {
                     user = o_user;
                     user->broad_cm_ctx = broad_cm_ctx;
