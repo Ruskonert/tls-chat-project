@@ -390,6 +390,8 @@ int user_broad_free(User* user)
         pthread_mutex_t* mutex = get_connect_manager_of_mutex(cm_ctx);
         if(user->_broad_conn != 0) {
             disconnect(user->_broad_conn, mutex, true);
+            set_broad_suspend(user);
+            pthread_mutex_unlock(user->_mutex);
 
             pthread_mutex_lock(mutex);
 
@@ -399,8 +401,7 @@ int user_broad_free(User* user)
             pthread_mutex_unlock(mutex);
         }
 
-            // 클라이언트의 메세지 리시버 연결을 대기하고 있는 쓰레드 작업을 종료합니다.
-        set_broad_suspend(user);
+        // 클라이언트의 메세지 리시버 연결을 대기하고 있는 쓰레드 작업을 종료합니다.
         pthread_kill(user->_broad_tid, 0);
 
         free(user->_broad_tid);

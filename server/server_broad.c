@@ -27,6 +27,8 @@ struct broad_arg_t
     ScheduleMessage* message;
 };
 
+
+
 void* broad_send_message(void* argv)
 {
     struct broad_arg_t* argv_ptr = (struct broad_arg_t*)argv;
@@ -93,6 +95,9 @@ void* communicate_broad_user(void* argv)
         }
         */
         pthread_mutex_lock(user_mutex);
+        if(is_broad_suspend(ctx)) {
+            return -1;
+        }
 
         char buf[MAX_LENGTH_MESSAGE] = {0, };
         int bytes = SSL_read(user_broad_session, buf, MAX_LENGTH_MESSAGE);

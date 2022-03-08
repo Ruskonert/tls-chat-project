@@ -274,7 +274,7 @@ int cmd_secret_message(void* ctx, Message* message)
             if(strcasecmp(recv_username, get_user_name(o_user)) == 0) {
                 if(get_user_broad_conn(o_user) == 0) {
 
-                    char* _m = "해당 유저는 현재 메시지 리시버가 켜져있지 않습니다. 메시지를 전달할 수 없습니다.";
+                    char* _m = "해당 유저는 현재 메시지 수신기가 켜져있지 않습니다. 메시지를 전달할 수 없습니다.";
                     Message* msg = packing_message_create(CMD_SECRET_MESSAGE, strlen(_m), _m);
                     send_ack_packing_message(user, msg);
                     return RESPONSE_CONN_SKIP;
@@ -282,8 +282,8 @@ int cmd_secret_message(void* ctx, Message* message)
 
                 sprintf(buf, "(1:1 메시지) [%s]: %s", get_user_name(user), send_message);
 
-                Message* c_message = packing_message_create(2, strlen(buf), buf);
-                ScheduleMessage* s_message = schedule_message_create(get_current_joined_user(cm), true, c_message);
+                Message* c_message = packing_message_create(1, strlen(buf), buf);
+                ScheduleMessage* s_message = schedule_message_create(2, true, c_message);
                 
                 pthread_t thread;
                 struct broad_arg_t* a_list = (struct broad_arg_t*)malloc(sizeof(struct broad_arg_t));
@@ -296,8 +296,8 @@ int cmd_secret_message(void* ctx, Message* message)
                 pthread_t thread2;
                 struct broad_arg_t* a_list2 = (struct broad_arg_t*)malloc(sizeof(struct broad_arg_t));
 
-                a_list->user = user;
-                a_list->message = s_message;
+                a_list2->user = user;
+                a_list2->message = s_message;
                 pthread_create(&thread2, NULL, broad_send_message, (void*)a_list2);
 
                 return RESPONSE_CONN_OK;
