@@ -35,15 +35,8 @@ char* packing_message_to_string(int type, int len, char* message)
 
 ## 브로드캐스트에 대한 램 누수 문제 ❌
 (증상) 메시지를 다른 유저에게 브로드캐스트한 후, 메시지에 대한 램 할당이 해지되지 않고 사용량이 계속 늘어남.<br />
-(원인) <code>server_cmd.c</code> 파일에서 <code>cmd_broadcast_message</code>함수 내에 있는 아래 코드가 원인임.<br />
-```c
-        pthread_t thread;
-
-        void* a_list[] = {o_user, s_message};
-        pthread_create(&thread, NULL, broad_send_message, a_list); // memory allocation!
-```
-thread 자원이 여전히 잔여함에 따라 (8바이트), 작업이 끝났음에도 불구하고 자원 할당이 풀리지 않는 현상이 있었음.<br />
-(해결방안) 쓰레드 자원을 동적으로 할당해서 동작시키고, 동작이 종료되면 자원 할당을 헤제해주는 개별 루틴이 필요함. <br />
+(원인) <code>server_cmd.c</code> 파일에서 <code>cmd_broadcast_message</code>함수에서 쓰레드를 생성하고, broad_send_message 함수 내에서 메모리 누수가 발생함, 쓰레드 작업이 끝났음에도 불구하고 자원 할당이 해제되지 않는 현상이 있었음.<br />
+(해결방안) 쓰레드 함수 어딘가에서 자원 할당이 필요한 부분이 존재하며, 자원을 헤제해주는 루틴이 필요함. <br />
 <br />
 
 ## 클라이언트 및 메시지 리시버가 연결된 후, 메시지 리시버가 강제 종료 시 프로그램이 정지하는 문제 ✅

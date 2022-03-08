@@ -38,7 +38,7 @@ RUN ["make"]
 RUN ["ldconfig", "/usr/local/lib64"]
 
 # 서버 전용 이미지 제작 시 하단 코드를 주석 처리 혹은 삭제가 필요합니다.
-# ENTRYPOINT ["./proc_client", "172.17.0.2", "4433"]
+ENTRYPOINT ["./proc_client", "172.17.0.2", "4433"]
 
 # 원격 디버깅
 # ENTRYPOINT ["gdbserver", "0.0.0.0:9091", "./proc_server"]

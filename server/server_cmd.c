@@ -282,17 +282,23 @@ int cmd_secret_message(void* ctx, Message* message)
 
                 sprintf(buf, "(1:1 메시지) [%s]: %s", get_user_name(user), send_message);
 
-                Message* c_message = packing_message_create(1, strlen(buf), buf);
+                Message* c_message = packing_message_create(2, strlen(buf), buf);
                 ScheduleMessage* s_message = schedule_message_create(get_current_joined_user(cm), true, c_message);
                 
                 pthread_t thread;
+                struct broad_arg_t* a_list = (struct broad_arg_t*)malloc(sizeof(struct broad_arg_t));
 
-                void* a_list[] = {o_user, s_message};
+                a_list->user = o_user;
+                a_list->message = s_message;
                 pthread_create(&thread, NULL, broad_send_message, (void*)a_list);
 
+
                 pthread_t thread2;
-                void* a_list2[] = {user, s_message};
-                pthread_create(&thread, NULL, broad_send_message, (void*)a_list2);
+                struct broad_arg_t* a_list2 = (struct broad_arg_t*)malloc(sizeof(struct broad_arg_t));
+
+                a_list->user = user;
+                a_list->message = s_message;
+                pthread_create(&thread2, NULL, broad_send_message, (void*)a_list2);
 
                 return RESPONSE_CONN_OK;
             }

@@ -2,7 +2,7 @@
 [![Build Status](https://app.travis-ci.com/Ruskonert/tls-chat-project.svg?branch=master)](https://app.travis-ci.com/Ruskonert/tls-chat-project)<br />
 이 프로젝트에서는 C언어를 복습하고, 활용 능력을 향상시키기 위한 목적으로 수행하였으며, OpenSSL 및 비동기 소켓 기반의 채팅 서버, 클라이언트를 개발합니다.<br /><br />
 최종 업데이트 날짜 2022.03.07<br /><br />
-<img src="screenshot.png" alt="drawing"/>
+<img src="images/screenshot.png" alt="drawing"/>
 # 주요 기능
 - 비동기 소켓 기반으로 설계되어 여러 명이 대화할 수 있으며, 한 서버에 최대 64명까지 접속 가능합니다.
 - 기본 채팅 기능을 지원합니다.
