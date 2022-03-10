@@ -16,9 +16,20 @@ export class PackingMessage
     return newMessage;
   }
 
-  static ConvertMessageFromBinary(data : Buffer)
+
+  static ConvertMessageFromBinary(data : string)
   {
+    const magicNumber = data.substring(1, 4);
+    if(!(Buffer.from(magicNumber).equals(Buffer.from([239, 191, 119, 102])))) {
+      console.log("Invalid magic number of packet data");
+      return null;
+    }
     
+    const commandNum = parseInt(("0x" + data.substring(5, 8)).replace(/^#/, ''), 16);
+    const messageLen = parseInt(("0x" + data.substring(7, 11)).replace(/^#/, ''), 16);
+
+    var packingMessage = new PackingMessage(messageLen, commandNum, data.substring(12));
+    return packingMessage;
   }
 
 
@@ -43,4 +54,8 @@ export class PackingMessage
     var completeStr = `${magicNumber}${commandStr}${dataLengthStr}${this.data}`;
     return completeStr;
   }
+}
+
+export function isPackingMessage(buf : any) {
+  return Buffer.from(buf.substring(1, 4)).equals(Buffer.from([239, 191, 119, 102]));
 }

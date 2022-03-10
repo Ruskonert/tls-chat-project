@@ -80,11 +80,13 @@ function requestFunction() {
         var respMessage : string[] = res.data.message;
         const intersection = respMessage.filter(x => !chatMessage.includes(x));
         chatMessage.push(...intersection);
-        requestFunction();
+        setTimeout(requestFunction, 0);
     });
 }
 
-requestFunction();
+setTimeout(requestFunction, 1000);
+
+
 
 function submitPackingMessage(message?: string)
 {
