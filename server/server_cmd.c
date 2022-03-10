@@ -153,7 +153,7 @@ int cmd_change_name(void* ctx, Message* message)
         output_message(MSG_COMMAND, get_user_conn(user), mutex, "Requested username changed, but name is empty\n");
 
         char _m[64] = {0,};
-        sprintf(_m, "현재 닉네임: %s", get_user_name(user));
+        sprintf(_m, "현재 닉네임 - %s", get_user_name(user));
         Message* message = packing_message_create(CMD_CHANGE_NICKNAME, strlen(_m), _m);
         send_ack_packing_message(user, message);
 
@@ -173,7 +173,7 @@ int cmd_change_name(void* ctx, Message* message)
 
     if(strchr(nickname, ' ') != NULL || strchr(nickname, '\"') != NULL) {
         output_message(MSG_ERROR, get_user_conn(user), mutex, "Nickname was violated the rule\n");
-        char* _m = "사용이 금지된 문자가 포함되어 있습니다, 사용법: /name <바꿀이름>";
+        char* _m = "사용이 금지된 문자가 포함되어 있습니다 (띄어쓰기, \"), 사용법: /name <바꿀이름>";
         Message* message = packing_message_create(CMD_CHANGE_NICKNAME, strlen(_m), _m);
         send_ack_packing_message(user, message);
 
@@ -181,6 +181,7 @@ int cmd_change_name(void* ctx, Message* message)
     }
 
     char* username = get_user_name(user);
+
     User** u = get_connect_manager_user(get_user_connect_manager(user));
     for(int i = 0; i < MAX_USER_CONNECTION; i++)
     {
@@ -189,8 +190,7 @@ int cmd_change_name(void* ctx, Message* message)
 
         char* name = get_user_name(u[i]);
 
-
-        if( strcasecmp(packing_message_string(message), username) == 0 ) {
+        if(strcasecmp(nickname, name) == 0) {
             output_message(MSG_ERROR, get_user_conn(user), mutex, "Nickname is already in use\n");
 
             char* _m = "이미 사용중인 닉네임입니다.";
