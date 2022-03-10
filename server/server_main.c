@@ -76,11 +76,11 @@ int main(int argc, char* argv[])
     }
 
     // 현재 접속한 유저와 연결을 끊습니다.
-    User** user = get_connect_manager_user(ctx);
+    UserContext** user_arr = get_connect_manager_user(ctx);
 
     for(int i = 0; i < MAX_USER_CONNECTION; i++)
     {
-        user_disconnect(user[i], true);
+        user_disconnect(user_arr[i], true);
     }
 
     SSLContext* broad_context = get_conn_ssl_context(get_connect_manager_of_conn(broad_ctx));

@@ -62,7 +62,7 @@ struct connect_manager_t
     bool                  isSuspend;                        /* 동작 중지 유무 */
 
     Connection*           _server_attr_ctx;                 /* 서버 연결 정보 */
-    User**                _user_arr;                        /* 서버에 접속 중인 유저 리스트 */
+    UserContext**         _user_arr;                        /* 서버에 접속 중인 유저 리스트 */
     pthread_t*            _tid;
     pthread_mutex_t*      _mutex;
     pthread_mutex_t*      _message_mutex;
@@ -76,13 +76,13 @@ struct connect_manager_t
  * @param user 유저 컨텍스트 값이 포함됩니다.
  * @param ssl 유저의 SSL 컨텍스트가 전달됩니다.
  */
-void show_certs(User *user, SSL* ssl)
+void show_certs(UserContext *user, SSL* ssl)
 {   X509 *cert;
     char *line;
 
     Connection* conn = get_user_conn(user);
     pthread_mutex_t* mutex = get_connect_manager_of_mutex(get_user_connect_manager(user));
- 
+    
     cert = SSL_get_peer_certificate(ssl);
     if ( cert != NULL ) {
 
@@ -104,68 +104,68 @@ void show_certs(User *user, SSL* ssl)
 }
 
 
-ConnectManager* get_user_broad_connect_manager(User* user)
+ConnectManager* get_user_broad_connect_manager(UserContext* user)
 {
     return user->broad_cm_ctx;
 }
 
 
 
-void set_user_board_thread(User* user, pthread_t* tid)
+void set_user_board_thread(UserContext* user, pthread_t* tid)
 {
     user->_broad_tid = tid;
 }
 
 
 
-pthread_t* get_user_board_thread(User* user)
+pthread_t* get_user_board_thread(UserContext* user)
 {
     return user->_broad_tid;    
 }
 
 
-pthread_mutex_t*  get_user_mutex(User* user)
+pthread_mutex_t*  get_user_mutex(UserContext* user)
 {
     return user->_mutex;
 }
 
 
-void set_user_broad_conn(User* user, Connection* connection)
+void set_user_broad_conn(UserContext* user, Connection* connection)
 {
     user->_broad_conn = connection;
 }
 
 
 
-Connection* get_user_broad_conn(User* user)
+Connection* get_user_broad_conn(UserContext* user)
 {
     return user->_broad_conn;    
 }
 
 
 
-bool is_user_verified(User* user)
+bool is_user_verified(UserContext* user)
 {
     return user->verified;
 }
 
 
 
-int get_user_allocated_index(User* user)
+int get_user_allocated_index(UserContext* user)
 {
     return user->_alloc;
 }
 
 
 
-bool set_user_verified(User* user, bool verified)
+bool set_user_verified(UserContext* user, bool verified)
 {
     return user->verified = verified;
 }
 
 
 
-Connection* get_user_conn(User* user)
+Connection* get_user_conn(UserContext* user)
 {
     return user->conn;
 }
@@ -179,11 +179,11 @@ Connection* get_connect_manager_of_conn(ConnectManager* ctx)
 
 
 
-ConnectManager* get_user_connect_manager(User* user) { return user->cm_ctx; }
+ConnectManager* get_user_connect_manager(UserContext* user) { return user->cm_ctx; }
 
 
 
-char* get_user_name(User* user) { return user->uname; }
+char* get_user_name(UserContext* user) { return user->uname; }
 
 
 pthread_mutex_t* get_connect_manager_of_mutex(ConnectManager* ctx) { return ctx->_mutex; }
@@ -196,11 +196,11 @@ pthread_mutex_t* get_connect_manager_of_message_mutex(ConnectManager* ctx)
 
 
 
-User** get_connect_manager_user(ConnectManager* cm) {  return cm->_user_arr; }
+UserContext** get_connect_manager_user(ConnectManager* cm) {  return cm->_user_arr; }
 
 
 
-void set_user_name(User* user, char* username)
+void set_user_name(UserContext* user, char* username)
 {
     if ( strlen(username) > USERNAME_MAX_LENGTH ) return;
     strcpy(user->uname, username);
@@ -208,7 +208,7 @@ void set_user_name(User* user, char* username)
 
 
 
-bool is_user_established_server(User* user)
+bool is_user_established_server(UserContext* user)
 {
     if(user == 0) return false;
     if(user->conn == 0) return false;
@@ -217,7 +217,7 @@ bool is_user_established_server(User* user)
 
 
 
-bool is_user_joined_server(User* user) 
+bool is_user_joined_server(UserContext* user) 
 {
     if(user == 0) return false;
     if(user->conn == 0) return false;
@@ -231,7 +231,7 @@ int get_current_established_user(ConnectManager* cm)
     int idx = 0;
     int count = 0;
     while( idx < MAX_USER_CONNECTION) {
-        User* user = cm->_user_arr[idx];
+        UserContext* user = cm->_user_arr[idx];
         if(user != 0 && is_user_established_server(user))
         {
             count++;
@@ -249,7 +249,7 @@ int get_current_joined_user(ConnectManager* cm)
     int idx = 0;
     int count = 0;
     while( idx < MAX_USER_CONNECTION ) {
-        User* user = cm->_user_arr[idx];
+        UserContext* user = cm->_user_arr[idx];
         if(user != 0 && is_user_joined_server(user))
         {
             count++;
@@ -267,7 +267,7 @@ int get_current_broad_user(ConnectManager* cm)
     int idx = 0;
     int count = 0;
     while( idx < MAX_USER_CONNECTION ) {
-        User* user = cm->_user_arr[idx];
+        UserContext* user = cm->_user_arr[idx];
         if(user != 0 && get_user_broad_conn(user) == 0)
         {
             count++;
@@ -280,7 +280,7 @@ int get_current_broad_user(ConnectManager* cm)
 
 
 
-User* start_communicate_user(ConnectManager* ctx, SOCKET_HANDLE user_sd, struct sockaddr* addr)
+UserContext* start_communicate_user(ConnectManager* ctx, SOCKET_HANDLE user_sd, struct sockaddr* addr)
 {
     SSLContext* server_ssl_ctx = get_conn_ssl_context(ctx->_server_attr_ctx);
     SSL* ssl_user_sd = SSL_new(get_ssl_ctx_context(server_ssl_ctx));
@@ -290,7 +290,7 @@ User* start_communicate_user(ConnectManager* ctx, SOCKET_HANDLE user_sd, struct 
 
     if ( SSL_accept(ssl_user_sd) == -1 ) {
         ERR_print_errors_fp(stderr);
-        return (User*)-1;
+        return (UserContext*)-1;
     }
     Connection* conn = connection_create(server_ssl_ctx);
     pthread_mutex_t* mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
@@ -298,7 +298,7 @@ User* start_communicate_user(ConnectManager* ctx, SOCKET_HANDLE user_sd, struct 
 
     pthread_mutex_init(mutex, NULL);
 
-    User* user = (User*)malloc(sizeof(User));
+    UserContext* user = (UserContext*)malloc(sizeof(UserContext));
 
     user->_mutex = mutex;
     user->_tid = thread;
@@ -314,7 +314,7 @@ User* start_communicate_user(ConnectManager* ctx, SOCKET_HANDLE user_sd, struct 
 
     if( __builtin_expect( pthread_create(thread, NULL, communicate_user, (void*)user) == -1, 0)) {
         printf("Generating thread was failed!\n");
-        return (User*)-1;   
+        return (UserContext*)-1;   
     }
     return user;
 }
@@ -332,7 +332,7 @@ int current_user_index(ConnectManager* ctx)
     int idx = 0;
     
     while( idx < MAX_USER_CONNECTION + 64) {
-        User* user = ctx->_user_arr[idx];
+        UserContext* user = ctx->_user_arr[idx];
         if(user == 0) {
             pthread_mutex_unlock(ctx->_mutex);
             return idx;
@@ -345,14 +345,14 @@ int current_user_index(ConnectManager* ctx)
 
 
 
-bool is_broad_suspend(User* user)
+bool is_broad_suspend(UserContext* user)
 {
     return user->_broad_suspend;
 }
 
 
 
-void set_broad_suspend(User* user)
+void set_broad_suspend(UserContext* user)
 {
     if(user == 0) return;
     user->_broad_suspend = !user->_broad_suspend;
@@ -360,7 +360,7 @@ void set_broad_suspend(User* user)
 
 
 
-bool user_disconnect(User* user, bool safety_shutdown) 
+bool user_disconnect(UserContext* user, bool safety_shutdown) 
 {
     if( user == 0 ) return false; 
     
@@ -384,7 +384,7 @@ bool user_disconnect(User* user, bool safety_shutdown)
 }
 
 
-int user_broad_disconnect(User* user)
+int user_broad_disconnect(UserContext* user)
 {
     ConnectManager *cm_ctx = get_user_broad_connect_manager(user);
 
@@ -424,7 +424,7 @@ int user_broad_disconnect(User* user)
 }
 
 
-int user_free(User* user)
+int user_free(UserContext* user)
 {
     if(user == 0) return -1;
 
@@ -452,7 +452,7 @@ int user_free(User* user)
  * @param user_sd 
  * @param addr 
  */
-void start_communicate_broadcast_user(User* user, SOCKET_HANDLE user_sd, struct sockaddr* addr)
+void start_communicate_broadcast_user(UserContext* user, SOCKET_HANDLE user_sd, struct sockaddr* addr)
 {
     ConnectManager* server_cm_ctx = get_user_connect_manager(user);
     SSLContext* server_broad_ssl_ctx = get_conn_ssl_context(server_cm_ctx->_server_attr_ctx);
@@ -539,11 +539,11 @@ int create_broad_session_job (ConnectManager* server_ctx, char* host_ip, int por
         const char* user_ip = inet_ntoa(((struct sockaddr_in *)&user_addr)->sin_addr);
         output_message(MSG_CONNECTION, NULL, broad_cm_ctx->_message_mutex, "Tried to connect the broadcast channel from %s\n", user_ip);
 
-        User* user = -1;
+        UserContext* user = -1;
 
         // 연결 요청한 클라이언트가 채팅 서버에 접속한 상태인지 검증합니다.
         for(int i = 0; i < MAX_USER_CONNECTION; i++) {
-            User* o_user = broad_cm_ctx->_user_arr[i];
+            UserContext* o_user = broad_cm_ctx->_user_arr[i];
             if(is_user_joined_server(o_user)) {
                 Connection* user_conn = get_user_conn(o_user);
                 const char* ip = get_conn_ip_addr(user_conn);
@@ -557,7 +557,7 @@ int create_broad_session_job (ConnectManager* server_ctx, char* host_ip, int por
                 }
             }
         }
-        if (user == (User*)-1) {
+        if (user == (UserContext*)-1) {
             output_message(MSG_CONNECTION, NULL, broad_cm_ctx->_message_mutex, "Invaild requested, closed connection for broadcasting -> %s:%d\n", user_ip, port);
             close(user_sd);
         }
@@ -604,7 +604,7 @@ void* wait_for_new_user(void* argv)
     while( !ctx->isSuspend ) {
         struct sockaddr_in c_addr = {0, };
         socklen_t len = sizeof(c_addr);
-        User* user;
+        UserContext* user;
 
         // 새로운 유저가 연결될때마다 처리합니다.
         user_sd = accept(sd, (struct sockaddr*)&c_addr, &len);
@@ -630,7 +630,7 @@ void* wait_for_new_user(void* argv)
 
         // 접속한 클라이언트 데이터에 기반하여, 서버에서 관리하기 위한 유저 컨텍스트 정보를 생성합니다.
         user = start_communicate_user(ctx, user_sd, (struct sockaddr*)&c_addr);
-        if(user == (User*)-1) {
+        if(user == (UserContext*)-1) {
             output_message(MSG_ERROR, NULL, ctx->_message_mutex, "Some of client was connected, but SSL service is invaild\n");
             close(user_sd);
             continue;
@@ -652,7 +652,7 @@ void* wait_for_new_user(void* argv)
 
         set_user_name(user, randomString);
 
-        if( __builtin_expect(user == (User*)-1, 0)) {
+        if( __builtin_expect(user == (UserContext*)-1, 0)) {
             output_message(MSG_ERROR, NULL, ctx->_message_mutex, "Failed to allocate the user, except the user\n");
             close(user_sd);
             continue;
@@ -704,9 +704,9 @@ bool connect_manager_execute(ConnectManager* ctx, char* host_ip, int port)
     ctx->_tid = thread;
     
     // 유저에 대한 여유 할당 추가
-    ctx->_user_arr = (User **)malloc(sizeof(User*) * ((MAX_USER_CONNECTION + 1) + 64));
+    ctx->_user_arr = (UserContext **)malloc(sizeof(UserContext*) * ((MAX_USER_CONNECTION + 1) + 64));
 
-    memset(ctx->_user_arr, 0, sizeof(User*) * ((MAX_USER_CONNECTION + 1) + 64));
+    memset(ctx->_user_arr, 0, sizeof(UserContext*) * ((MAX_USER_CONNECTION + 1) + 64));
 
     argv = (void**)malloc(sizeof(unsigned long*) * 3);
     *port_ptr = port;

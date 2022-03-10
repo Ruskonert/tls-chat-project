@@ -23,7 +23,7 @@
 
 struct broad_arg_t
 {
-    User* user;
+    UserContext* user;
     ScheduleMessage* message;
 };
 
@@ -33,7 +33,7 @@ void* broad_send_message(void* argv)
 {
     struct broad_arg_t* argv_ptr = (struct broad_arg_t*)argv;
 
-    User* user = argv_ptr->user;
+    UserContext* user = argv_ptr->user;
     ScheduleMessage* smessage = argv_ptr->message;
 
     if(user == 0) return -1;
@@ -66,7 +66,7 @@ void* broad_send_message(void* argv)
 
 void* communicate_broad_user(void* argv)
 {
-    User* ctx = (User*)argv;
+    UserContext* ctx = (UserContext*)argv;
 
     ConnectManager* broad_cm = get_user_broad_connect_manager(ctx);
 

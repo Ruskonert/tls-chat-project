@@ -31,7 +31,7 @@
  * @param message Packing Message가 포함됩니다.
  * @return int SSL_write에 대한 반환값입니다.
  */
-int send_ack_packing_message(User* user, Message* message)
+int send_ack_packing_message(UserContext* user, Message* message)
 {
     Connection* conn = get_user_conn(user);
     int status =  packing_message_send(conn, message);
@@ -42,7 +42,7 @@ int send_ack_packing_message(User* user, Message* message)
 
 struct broad_arg_t
 {
-    User* user;
+    UserContext* user;
     ScheduleMessage* message;
 };
 
@@ -50,14 +50,14 @@ struct broad_arg_t
 // 현재 서버에 접속하고 있는 모든 인원에게 특정 메시지를 전송할 떄 실행됩니다.
 int cmd_broadcast_message(void* ctx, Message* message)
 {
-    User* user = (User*)ctx;
+    UserContext* user = (UserContext*)ctx;
     pthread_mutex_t* mutex = get_connect_manager_of_message_mutex(get_user_connect_manager(user));
     Connection* conn = get_user_conn(user);
 
     output_message(MSG_INFO, conn, mutex, "%s said: %s\n", get_user_name(user), packing_message_string(message));
 
     ConnectManager* cm = get_user_connect_manager(user);
-    User** connected_user_arr = get_connect_manager_user(cm);
+    UserContext** connected_user_arr = get_connect_manager_user(cm);
 
     char buf[MAX_LENGTH_MESSAGE] = {0,};
     memset(buf, 0, MAX_LENGTH_MESSAGE);
@@ -68,7 +68,7 @@ int cmd_broadcast_message(void* ctx, Message* message)
     ScheduleMessage* s_message = schedule_message_create(get_current_joined_user(cm), true, c_message);
 
     for(int i = 0; i < MAX_USER_CONNECTION; i++) {
-        User* o_user = connected_user_arr[i];
+        UserContext* o_user = connected_user_arr[i];
 
         if(o_user == 0) continue;
         if(! is_user_joined_server(o_user)) continue;
@@ -88,7 +88,7 @@ int cmd_broadcast_message(void* ctx, Message* message)
 // 클라이언트와 처음 연결한 후, 클라이언트 검증 과정을 수행하는 함수입니다.
 int cmd_welcome_handshake(void* ctx, Message* message)
 {
-    User* user = (User*)ctx;
+    UserContext* user = (UserContext*)ctx;
     pthread_mutex_t* message_mutex = get_connect_manager_of_message_mutex(get_user_connect_manager(user));
     Connection* conn = get_user_conn(user);
 
@@ -142,7 +142,7 @@ int cmd_welcome_handshake(void* ctx, Message* message)
 int cmd_change_name(void* ctx, Message* message)
 {
     char buf[512] = {0, };
-    User* user = (User*)ctx;
+    UserContext* user = (UserContext*)ctx;
     pthread_mutex_t* mutex = get_connect_manager_of_message_mutex(get_user_connect_manager(user));
 
 
@@ -180,7 +180,7 @@ int cmd_change_name(void* ctx, Message* message)
 
     char* username = get_user_name(user);
 
-    User** u = get_connect_manager_user(get_user_connect_manager(user));
+    UserContext** u = get_connect_manager_user(get_user_connect_manager(user));
     for(int i = 0; i < MAX_USER_CONNECTION; i++)
     {
         if(u == 0 || ! is_user_joined_server(u[i])) continue;
@@ -212,7 +212,7 @@ int cmd_change_name(void* ctx, Message* message)
 // 1:1 메시지를 송신하는 함수입니다.
 int cmd_secret_message(void* ctx, Message* message)
 {
-    User* user = (User*)ctx;
+    UserContext* user = (UserContext*)ctx;
 
     ConnectManager* cm = get_user_connect_manager(user);
     pthread_mutex_t* mutex = get_connect_manager_of_message_mutex(cm);
@@ -255,13 +255,13 @@ int cmd_secret_message(void* ctx, Message* message)
 
     output_message(MSG_INFO, conn, mutex, "(Requested) %s said to %s: %s\n", get_user_name(user), recv_username, send_message);
 
-    User** connected_user_arr = get_connect_manager_user(cm);
+    UserContext** connected_user_arr = get_connect_manager_user(cm);
 
     char buf[MAX_LENGTH_MESSAGE] = {0.};
     memset(buf, 0, MAX_LENGTH_MESSAGE);
 
     for(int i = 0; i < MAX_USER_CONNECTION; i++) {
-        User* o_user = connected_user_arr[i];
+        UserContext* o_user = connected_user_arr[i];
         
         if(o_user == 0) continue;
         if(o_user == user) continue;
@@ -313,13 +313,13 @@ int cmd_secret_message(void* ctx, Message* message)
 /// 현재 서버에 접속한 모든 인원의 정보를 송신하는 함수입니다.
 int cmd_current_user(void* ctx, Message* message)
 {
-    User* user = (User*)ctx;
+    UserContext* user = (UserContext*)ctx;
     ConnectManager* cm = get_user_connect_manager(user);
     pthread_mutex_t* mutex = get_connect_manager_of_message_mutex(cm);
 
     if( __builtin_expect(!is_user_verified(user), 0)) return RESPONSE_CONN_FAIL;
 
-    User** user_list = get_connect_manager_user(cm);
+    UserContext** user_list = get_connect_manager_user(cm);
 
     char _t[MAX_LENGTH_STR_MESSAGE] = {0,};
     char _m[MAX_LENGTH_STR_MESSAGE / 2] = {0,};
@@ -332,7 +332,7 @@ int cmd_current_user(void* ctx, Message* message)
     // [3] 닉네임
     // ...
     for(int i = 0; i < MAX_USER_CONNECTION; i++) {
-        User* o_user = user_list[i];
+        UserContext* o_user = user_list[i];
         if(! is_user_joined_server(o_user)) continue;
 
         char* username = get_user_name(o_user);
@@ -370,7 +370,7 @@ int cmd_current_user(void* ctx, Message* message)
 // 클라이언트에서 연결 종료를 요청했을 때 수행되는 함수입니다.
 int cmd_disconnect(void* ctx, Message* message)
 {
-    User* user = (User*)ctx;
+    UserContext* user = (UserContext*)ctx;
     pthread_mutex_t* mutex = get_connect_manager_of_message_mutex(get_user_connect_manager(user));
 
     set_conn_status(get_user_conn(user), USER_STATUS_SUSPEND);
@@ -388,7 +388,7 @@ int cmd_disconnect(void* ctx, Message* message)
 // 클라이언트가 지원하지 않은 명령을 요청할 때 수행되는 함수입니다.
 int cmd_not_supported(void* ctx, Message* message)
 {
-    User* user = (User*)ctx;
+    UserContext* user = (UserContext*)ctx;
     pthread_mutex_t* mutex = get_connect_manager_of_message_mutex(get_user_connect_manager(user));
     output_message(MSG_COMMAND, get_user_conn(user), mutex, "Not support command: \"%s\"\n", packing_message_string(message));
     return RESPONSE_CONN_NO_SUPPORT;

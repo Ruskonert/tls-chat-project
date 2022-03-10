@@ -39,7 +39,7 @@
  * @param message Packing Message가 포함됩니다.
  * @return int 명령어 실행에 대한 response code 값이 반환됩니다.
  */
-int execute_command(User* ctx, Message* message) {
+int execute_command(UserContext* ctx, Message* message) {
     if(packing_message_command_type(message) >= MAX_LENGTH_COMMAND) return RESPONSE_CONN_NO_SUPPORT;
     COMMAND_FUNC func = get_prog_command_function()[packing_message_command_type(message)];
 
@@ -56,7 +56,7 @@ int execute_command(User* ctx, Message* message) {
  */
 void* communicate_user(void* argv)
 {
-    User* ctx = (User*)argv;
+    UserContext* ctx = (UserContext*)argv;
     ConnectManager* cm = get_user_connect_manager(ctx);
     pthread_mutex_t* mutex = get_connect_manager_of_mutex(cm);
 
@@ -93,7 +93,7 @@ void* communicate_user(void* argv)
             free(msg);
         }
     }
-    
+
     user_broad_disconnect(ctx);
     user_disconnect(ctx, true);
     return (void*)0;
