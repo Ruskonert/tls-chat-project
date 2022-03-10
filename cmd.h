@@ -13,7 +13,7 @@
 #define CMD_BROADCASE_MESSAGE      0x01
 #define CMD_CHANGE_NICKNAME        0x02
 #define CMD_SECRET_MESSAGE         0x03
-#define CMD_STATUS                 0x04
+#define CMD_CURRENT_USER           0x04
 #define CMD_DISCONNECT             0x05
 
 #define CMD_NOT_SUPPORTED          0xFF

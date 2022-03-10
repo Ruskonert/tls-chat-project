@@ -6,12 +6,11 @@ import * as fs  from 'fs';
 import * as body_parser from 'body-parser';
 
 import {PackingMessage} from './client_type';
-import { toEditorSettings } from 'typescript';
 
 // 브로드캐스트 서버로부터 받은 메시지를 저장합니다.
 const recvMessage: string[] = [];
 var recvMessageSize = 0;
-
+var latestSize = 0;
 
 const options : tls.ConnectionOptions = {
   ca: [fs.readFileSync('cert/server.key')],
@@ -68,8 +67,20 @@ app.use(body_parser.json());
 const server = require('http').createServer(app);
 
 
+
+
 app.get('/', (req : Request, res: Response) => {
-  res.send({message: recvMessage});
+  while(true) {
+    const len = recvMessage.length;
+    if(latestSize < len) {
+      res.send({message: recvMessage});
+      latestSize = len;
+      break;
+    }
+    else {
+      continue;
+    }
+  }
 });
 
 

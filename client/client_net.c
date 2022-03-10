@@ -156,7 +156,7 @@ int execute_client_manager(Connection* conn, pthread_mutex_t* proc_mutex, pthrea
             else {
 
                 // 명령 별로 메시지를 처리합니다.
-                if(packing_message_command_type(message) == CMD_STATUS) {
+                if(packing_message_command_type(message) == CMD_CURRENT_USER) {
                     char *str = packing_message_string(message);
                     char *ptr = strtok(str, "\n");
 

@@ -27,7 +27,7 @@ struct command_type_t get_command_type(char* buf)
     }
 
     if( strcmp("/status", buf) == 0) {
-        ct.type = CMD_STATUS;
+        ct.type = CMD_CURRENT_USER;
         ct.hasArgument = false;
     }
 

@@ -74,14 +74,17 @@ setInterval(() => {
 }, 100);
 
 
-setInterval(() => {
+
+function requestFunction() {
     axios.get('http://localhost:9999/').then(res => {
         var respMessage : string[] = res.data.message;
         const intersection = respMessage.filter(x => !chatMessage.includes(x));
         chatMessage.push(...intersection);
+        requestFunction();
     });
-}, 100);
+}
 
+requestFunction();
 
 function submitPackingMessage(message?: string)
 {
