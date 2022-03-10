@@ -36,11 +36,11 @@ typedef struct connect_manager_t ConnectManager;
 
 void              show_certs(UserContext *user, SSL* ssl);
 
-// 메시지 리시버 연결 요청 쓰레드에 정치 요청 여부를 반환합니다.
+// 메시지 수신기 연결 요청 쓰레드에 정치 요청 여부를 반환합니다.
 bool              is_broad_suspend(UserContext* user);
 
 
-// 메시지 리시버 연결 요청 쓰레드를 정지시킵니다.
+// 메시지 수신기 연결 요청 쓰레드를 정지시킵니다.
 void              set_broad_suspend(UserContext* user);
 
 int               get_user_allocated_index(UserContext* user);
@@ -90,6 +90,9 @@ bool              is_user_joined_server(UserContext* user);
 // prevent_shutdown은 SSL_Shutdown에 대한 호출 여부를 결정합니다.
 bool              user_disconnect(UserContext* user, bool prevent_shutdown);
 
+
+// 유저  데이터를 통해 클라이언트의 정보를 읽어들어 브로드캐스트 서버와의 연결을 끊습니다.
+// 브로드캐스트 서버와 연결되어 있지 않으면 이 작업은 무시됩니다.
 int               user_broad_disconnect(UserContext* user);
 
 /**
@@ -117,7 +120,7 @@ ConnectManager*   connect_manager_create(bool isInitialized);
 // ConnectManger 인스턴스를 실행시킵니다.
 bool              connect_manager_execute(ConnectManager* ctx, char* host_ip, int port);
 
-UserContext**            get_connect_manager_user(ConnectManager* cm);
+UserContext**     get_connect_manager_user(ConnectManager* cm);
 Connection*       get_connect_manager_of_conn(ConnectManager* ctx);
 pthread_mutex_t*  get_connect_manager_of_mutex(ConnectManager* ctx);
 pthread_mutex_t*  get_connect_manager_of_message_mutex(ConnectManager* ctx);

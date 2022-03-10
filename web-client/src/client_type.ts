@@ -1,4 +1,6 @@
-// Packing Message를 정의합니다.
+/**
+ * PackingMessage 클래스를 정의합니다.
+ */
 export class PackingMessage
 {
   len : number;
@@ -8,10 +10,15 @@ export class PackingMessage
   data: string;
 
   
-  static ConvertMessage(command : number, data: string)
+  static ConvertMessage(command : number, data: string) : PackingMessage
   {
     var newMessage = new PackingMessage(data.length, command, data);
     return newMessage;
+  }
+
+  static ConvertMessageFromBinary(data : Buffer)
+  {
+    
   }
 
 

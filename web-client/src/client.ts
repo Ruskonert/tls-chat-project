@@ -7,6 +7,7 @@ import * as body_parser from 'body-parser';
 
 import {PackingMessage} from './client_type';
 
+
 // 브로드캐스트 서버로부터 받은 메시지를 저장합니다.
 const recvMessage: string[] = [];
 var recvMessageSize = 0;
@@ -18,25 +19,28 @@ const options : tls.ConnectionOptions = {
   rejectUnauthorized: false
 };
 
-
 var broadcastStream : tls.TLSSocket;
 
 /**
- * 메시지 리시버(브로드캐스트)와 연결합니다.
+ * 메시지 수신기(브로드캐스트)와 연결합니다.
  */
 const inputMessageStream : tls.TLSSocket = tls.connect(4433, options, () => {
   process.stdin.pipe(inputMessageStream);
   process.stdin.resume();
+
+  // 클라이언트 검증 절차를 수행합니다.
   var message : PackingMessage = PackingMessage.ConvertMessage(0, "CLIENT_VERSION 1.0.0");
   inputMessageStream.write(message.toString(), 'binary');
 
+
   /**
-   * 메시지 리시버(브로드캐스트)와 연결합니다.
+   * 클라이언트 검증 이후 메시지 수신기(브로드캐스트)와 연결합니다.
    */
   broadcastStream = tls.connect(8443, options, () => {
     process.stdin.pipe(broadcastStream);
     process.stdin.resume();
 
+    // 메시지 수신을 위한 패킷 전송을 수행합니다.
     var message : PackingMessage = PackingMessage.ConvertMessage(1, "");
     broadcastStream.write(message.toString(), 'binary');
   });

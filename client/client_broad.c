@@ -24,14 +24,14 @@ int main(int argc, char* argv[])
     pthread_mutex_t message_mutex;
     pthread_mutex_t socket_mutex;
     output_message(MSG_CONNECTION, NULL, NULL, "Started message receiver\n");
-    if (argc < 3)
+    if (argc < 2)
     {
-        printf("usage: %s <hostname> <portnum>\n", argv[0]);
+        printf("usage: %s <hostname>\n", argv[0]);
         exit(0);
     }
 
     char* hostname = argv[1];
-    int port = atoi(argv[2]);
+    int port = 8443;
 
     SSLContext* ctx = create_client_ssl_context(true);
     Connection* conn = connection_create(ctx);
@@ -103,6 +103,5 @@ int main(int argc, char* argv[])
     close(socket_id);
 
     SSL_CTX_free(get_ssl_ctx_context(ctx));
-
     return 0;
 }

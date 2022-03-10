@@ -50,8 +50,8 @@ struct user_t
 
     ConnectManager*            broad_cm_ctx;
     bool                       _broad_suspend;
-    pthread_t*                 _broad_tid;                  /* 클라이언트의 메시지 리시버 연결 쓰레드 */
-    Connection*                _broad_conn;                 /* 클라이언트의 메시지 리시버 연결 정보 */
+    pthread_t*                 _broad_tid;                  /* 클라이언트의 메시지 수신기 연결 쓰레드 */
+    Connection*                _broad_conn;                 /* 클라이언트의 메시지 수신기 연결 정보 */
 };
 
 
@@ -321,10 +321,7 @@ UserContext* start_communicate_user(ConnectManager* ctx, SOCKET_HANDLE user_sd, 
 
 
 /**
- * @brief 
- * 
- * @param ctx 
- * @return int 
+ * 할당 가능한 유저 컨텍스트의 인덱스를 반환합니다.
  */
 int current_user_index(ConnectManager* ctx)
 {
@@ -409,7 +406,7 @@ int user_broad_disconnect(UserContext* user)
 
         pthread_mutex_lock(mutex);
 
-        // 클라이언트의 메세지 리시버 연결을 대기하고 있는 쓰레드 작업을 종료합니다.
+        // 클라이언트의 메세지 수신기 연결을 대기하고 있는 쓰레드 작업을 종료합니다.
         pthread_kill(user->_broad_tid, SIGINT);
         free(user->_broad_tid);
         set_user_board_thread(user, 0);

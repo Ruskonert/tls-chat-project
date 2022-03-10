@@ -23,7 +23,8 @@
         "json.h": "c",
         "json_object.h": "c",
         "printbuf.h": "c",
-        "json_types.h": "c"
+        "json_types.h": "c",
+        "optional": "c"
     },
     "git.ignoreLimitWarning": true
 }

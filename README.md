@@ -103,14 +103,14 @@
 | <code>server/server_net.c</code> | O | TLS 핸드쉐이크 과정을 구현하고, 클라이언트 연결 정보를 관리하기 위한 기능, 구조체를 정의합니다. |
 | <code>server/server_comm.c</code> | X | 클라이언트와 서버 프로그램 간 패킷을 읽어들이고, 메시지로 변환 및 처리하는 기능을 구현합니다. |
 | <code>server/server_cmd.c</code> | X | 클라이언트에서 요청한 명렁을 처리하는 기능을 구현합니다. |
-| <code>server/server_broad.c</code> | O | 클라이언트의 메시지 리시버를 대상으로 연결을 수행하는 기능을 구현합니다. |
+| <code>server/server_broad.c</code> | O | 클라이언트의 메시지 수신기를 대상으로 연결을 수행하는 기능을 구현합니다. |
 
 ## 클라이언트 파일
 | 파일명 | 헤더 파일 포함 여부 | 설명 |
 |:---:|:---:|:------------:|
 | <code>client/client_main.c</code> | X | 클라이언트 프로그램의 <code>main</code> 함수를 구현합니다. |
 | <code>client/client_comm.c</code> | O | 서버 프로그램에 명령을 보내기 위한 메시지로 변환 및 처리하는 기능을 구현합니다. |
-| <code>client/client_broad.c</code> | X | 클라이언트의 메시지 리시버 기능을 구현합니다. |
+| <code>client/client_broad.c</code> | X | 클라이언트의 메시지 수신기 기능을 구현합니다. |
 | <code>client/client_net.c</code> | O | TLS 핸드쉐이크 과정을 구현하고, 서버와의 연결을 수행하기 위한 기능을 정의합니다. |
 
 ## 부속 파일
@@ -147,11 +147,11 @@ cd web-client
 # 사용 방법
 ```shell
 # 서버를 실행합니다. 포트 값을 입력하지 않으면 기본 포트는 4433입니다.
-# 메세지 리시버는 8443번 포트를 사용합니다.
+# 메세지 수신기는 8443번 포트를 사용합니다.
 sudo ./proc_server <port>
 
 # 클라이언트를 실행합니다. 포트 값을 입력하지 않으면 기본 포트는 4433입니다.
-# proc_recv는 메시지를 받기 위한 메시지 리시버(수신 프로그램)입니다.
+# proc_recv는 메시지를 받기 위한 메시지 수신기(수신 프로그램)입니다.
 ./proc_recv <host_ip> <port>
 ./proc_client <host_ip> <port>
 ```
