@@ -74,10 +74,9 @@ void* communicate_user(void* argv)
         // TLS 통신 에러 발생시 연결을 강제 종료합니다.
         if(bytes <= 0) {
             int error = ERR_get_error();
-            output_message(MSG_ERROR, conn, mutex, "TLS Connection Failed, Reason: %s\n", ERR_error_string(error, NULL));
+            output_message(MSG_ERROR, conn, mutex, "TLS Connection Failed when communicating the user, Reason: %s\n", ERR_error_string(error, NULL));
             set_conn_status(conn, USER_STATUS_SUSPEND);
-            user_disconnect(ctx, false);
-            return (void*)-1;
+            break;
         }
 
         Message* msg = packing_message_convert(buf, bytes);
@@ -94,6 +93,8 @@ void* communicate_user(void* argv)
             free(msg);
         }
     }
+    
+    user_broad_disconnect(ctx);
     user_disconnect(ctx, true);
     return (void*)0;
 }

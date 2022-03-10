@@ -150,8 +150,6 @@ int cmd_change_name(void* ctx, Message* message)
     
 
     if(strlen(packing_message_string(message)) == 0) {
-        output_message(MSG_COMMAND, get_user_conn(user), mutex, "Requested username changed, but name is empty\n");
-
         char _m[64] = {0,};
         sprintf(_m, "현재 닉네임 - %s", get_user_name(user));
         Message* message = packing_message_create(CMD_CHANGE_NICKNAME, strlen(_m), _m);
@@ -254,7 +252,6 @@ int cmd_secret_message(void* ctx, Message* message)
         send_ack_packing_message(user, msg);
         return RESPONSE_CONN_SKIP;
     }
-
 
     output_message(MSG_INFO, conn, mutex, "(Requested) %s said to %s: %s\n", get_user_name(user), recv_username, send_message);
 
@@ -363,7 +360,7 @@ int cmd_current_user(void* ctx, Message* message)
     sprintf(_t, "현재 접속한 인원 정보 [%d/%d]\n", get_current_joined_user(cm), MAX_USER_CONNECTION);
     strcat(_t, _m);
 
-    Message* msg = packing_message_create(CMD_STATUS, strlen(_t), _t);
+    Message* msg = packing_message_create(CMD_CURRENT_USER, strlen(_t), _t);
     send_ack_packing_message(user, msg);
     
     return RESPONSE_CONN_SKIP;
@@ -394,7 +391,6 @@ int cmd_not_supported(void* ctx, Message* message)
     User* user = (User*)ctx;
     pthread_mutex_t* mutex = get_connect_manager_of_message_mutex(get_user_connect_manager(user));
     output_message(MSG_COMMAND, get_user_conn(user), mutex, "Not support command: \"%s\"\n", packing_message_string(message));
-
     return RESPONSE_CONN_NO_SUPPORT;
 }
 
@@ -411,7 +407,7 @@ void initialize_command_loader(COMMAND_FUNC *FUNC_ARR)
     FUNC_ARR[CMD_BROADCASE_MESSAGE] = cmd_broadcast_message;
     FUNC_ARR[CMD_CHANGE_NICKNAME] = cmd_change_name;
     FUNC_ARR[CMD_SECRET_MESSAGE] = cmd_secret_message;
-    FUNC_ARR[CMD_STATUS] = cmd_current_user;
+    FUNC_ARR[CMD_CURRENT_USER] = cmd_current_user;
     FUNC_ARR[CMD_DISCONNECT] = cmd_disconnect;
     FUNC_ARR[CMD_NOT_SUPPORTED] = cmd_not_supported;
 }

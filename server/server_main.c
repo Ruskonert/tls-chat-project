@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     // 인자가 없다면 기본 주소 및 포트를 사용합니다.
     // 기본 포트는 4433번입니다.
     if(argc < 2) {
-        printf("Usuge: %s [host_ip] [port], Use default\n", argv[0]);
+        output_message(MSG_INFO, NULL, NULL, "You can also use as follows: %s [host_ip] [port]\n", argv[0]);
         addr = "0.0.0.0";
         port = 4433;
     }
@@ -68,22 +68,11 @@ int main(int argc, char* argv[])
         printf("Creating context was failed\n");
         return -1;
     }
-
+    pthread_create(&thread, NULL, output_current_user, (void*)ctx);
     ConnectManager *broad_ctx = connect_manager_create(false);
     if( !create_broad_session_job(ctx, addr, 8443)) {
         printf("Creating broadcast context was failed\n");
         return -1;
-    }
-
-    pthread_create(&thread, NULL, output_current_user, (void*)ctx);
-
-    // do loop ... 
-    char command[128] = {0};
-    while(1) {
-        scanf("%s", command);
-        if(strcmp("exit", command) == 0) {
-            return 1;
-        }
     }
 
     // 현재 접속한 유저와 연결을 끊습니다.

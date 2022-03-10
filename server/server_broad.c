@@ -38,7 +38,7 @@ void* broad_send_message(void* argv)
 
     if(user == 0) return -1;
 
-    ConnectManager* broad_cm = get_user_connect_manager(user);
+    ConnectManager* broad_cm = get_user_broad_connect_manager(user);
     Connection* broad_conn = get_user_broad_conn(user);
 
     if(broad_conn == 0) {
@@ -84,54 +84,49 @@ void* communicate_broad_user(void* argv)
     
     signal(SIGPIPE, SIG_IGN);
 
-    bool isFirst = true;
-
     while(get_conn_status(broad_conn) != USER_STATUS_SUSPEND) {
-        /*
-        // 브로드캐스트 메시지를 전달하기 전까지 무한정 대기합니다.
-        if(!isFirst && get_conn_status(broad_conn) == USER_STATUS_JOINED_AND_WAIT_MESSAGE) {
-            pthread_mutex_lock(user_mutex);
-            continue;
-        }
-        */
+
         pthread_mutex_lock(user_mutex);
+
+        pthread_mutex_lock(broad_mutex);
+        
         if(is_broad_suspend(ctx)) {
-            return -1;
-        }
-
-        char buf[MAX_LENGTH_MESSAGE] = {0, };
-        int bytes = SSL_read(user_broad_session, buf, MAX_LENGTH_MESSAGE);
-
-        // TLS 통신 에러 발생시 연결을 강제 종료합니다.
-        if(bytes <= 0) {
-            int error = ERR_get_error();
-            output_message(MSG_ERROR, conn, message_mutex, "Broadcast TLS Connection Failed, Reason: %s\n", ERR_error_string(error, NULL));
             set_conn_status(broad_conn, USER_STATUS_SUSPEND);
-            pthread_mutex_unlock(user_mutex);
+            pthread_mutex_unlock(broad_mutex);
+            break;
         }
-
         else {
-            Message* msg = packing_message_convert(buf, bytes);
-            
-            // 패킷 규격에 맞지 않는 비정상적인 패킷인지 검증합니다.
-            if( __builtin_expect(msg == (Message*)-1, 0)) {
-                output_message(MSG_CONNECTION, conn, message_mutex, "Broadcast forcibly disconnected, packet validation failed\n");
-                send_response_code(RESPONSE_CONN_BYE, conn, broad_mutex);
+            pthread_mutex_unlock(broad_mutex);
+
+            char buf[MAX_LENGTH_MESSAGE] = {0, };
+            int bytes = SSL_read(user_broad_session, buf, MAX_LENGTH_MESSAGE);
+
+            // TLS 통신 에러 발생시 연결을 강제 종료합니다.
+            if(bytes <= 0) {
+                int error = ERR_get_error();
+                output_message(MSG_ERROR, conn, message_mutex, "Broadcast TLS Connection Failed, Reason: %s\n", ERR_error_string(error, NULL));
                 set_conn_status(broad_conn, USER_STATUS_SUSPEND);
                 pthread_mutex_unlock(user_mutex);
             }
 
-            // 연결 상태를 변경하여 메시지 전송을 위한 작업을 대기합니다.
-            // broad_send_message 함수를 참고하십시오.
-            if(!packing_message_command_type(msg) == CMD_BROADCASE_MESSAGE) {
-                send_response_code(RESPONSE_CONN_NO_SUPPORT, conn, broad_mutex);
-                pthread_mutex_unlock(user_mutex);
-            }
-            free(msg);
-        }
-        isFirst = false;
-    }
+            else {
+                Message* msg = packing_message_convert(buf, bytes);
+                
+                // 패킷 규격에 맞지 않는 비정상적인 패킷인지 검증합니다.
+                if( __builtin_expect(msg == (Message*)-1, 0)) {
+                    output_message(MSG_CONNECTION, conn, message_mutex, "Broadcast forcibly disconnected, packet validation failed\n");
+                    send_response_code(RESPONSE_CONN_BYE, conn, broad_mutex);
+                    set_conn_status(broad_conn, USER_STATUS_SUSPEND);
+                    pthread_mutex_unlock(user_mutex);
+                }
 
-    output_message(MSG_CONNECTION, conn, message_mutex, "Broadcast client was disconnected from chat server\n");
-    user_broad_free(ctx);
+                if(!packing_message_command_type(msg) == CMD_BROADCASE_MESSAGE) {
+                    send_response_code(RESPONSE_CONN_NO_SUPPORT, conn, broad_mutex);
+                    pthread_mutex_unlock(user_mutex);
+                }
+                free(msg);
+            }
+        }
+    }
+    return 0;
 }

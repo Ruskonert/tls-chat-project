@@ -84,21 +84,23 @@ void show_certs(User *user, SSL* ssl)
     pthread_mutex_t* mutex = get_connect_manager_of_mutex(get_user_connect_manager(user));
  
     cert = SSL_get_peer_certificate(ssl);
-    if ( cert != NULL )
-    {
+    if ( cert != NULL ) {
 
-        output_message(MSG_CONNECTION, conn, mutex, "Server certificates:\n");
+        output_message(MSG_INFO, conn, mutex, "Server certificates:\n");
         line = X509_NAME_oneline(X509_get_subject_name(cert), 0, 0);
-        printf("Subject: %s\n", line);
+        output_message(MSG_INFO, conn, mutex, "Subject: %s\n", line);
 
         free(line);
+
         line = X509_NAME_oneline(X509_get_issuer_name(cert), 0, 0);
-        printf("Issuer: %s\n", line);
+        output_message(MSG_INFO, conn, mutex, "Issuer: %s\n", line);
         free(line);
+        
         X509_free(cert);
     }
-    else
+    else {
         output_message(MSG_INFO, conn, mutex, "No client certificates configured.\n");
+    }
 }
 
 
@@ -353,7 +355,7 @@ bool is_broad_suspend(User* user)
 void set_broad_suspend(User* user)
 {
     if(user == 0) return;
-    user->_broad_suspend = true;
+    user->_broad_suspend = !user->_broad_suspend;
 }
 
 
@@ -382,30 +384,42 @@ bool user_disconnect(User* user, bool safety_shutdown)
 }
 
 
-int user_broad_free(User* user)
+int user_broad_disconnect(User* user)
 {
     ConnectManager *cm_ctx = get_user_broad_connect_manager(user);
 
     if(user->_broad_tid != 0) {
         pthread_mutex_t* mutex = get_connect_manager_of_mutex(cm_ctx);
         if(user->_broad_conn != 0) {
-            disconnect(user->_broad_conn, mutex, true);
-            set_broad_suspend(user);
-            pthread_mutex_unlock(user->_mutex);
 
             pthread_mutex_lock(mutex);
 
-            conn_ctx_free(user->_broad_conn);
-            set_user_broad_conn(user, 0);
+            set_broad_suspend(user);
+            pthread_mutex_unlock(user->_mutex);
 
             pthread_mutex_unlock(mutex);
+
+            disconnect(user->_broad_conn, mutex, true);
+            
+            output_message(MSG_CONNECTION, user->_broad_conn, user->cm_ctx->_mutex, "Broadcast client was disconnected by chat server\n");
+
+            conn_ctx_free(user->_broad_conn);
+            set_user_broad_conn(user, 0);
         }
 
-        // 클라이언트의 메세지 리시버 연결을 대기하고 있는 쓰레드 작업을 종료합니다.
-        pthread_kill(user->_broad_tid, 0);
+        pthread_mutex_lock(mutex);
 
+        // 클라이언트의 메세지 리시버 연결을 대기하고 있는 쓰레드 작업을 종료합니다.
+        pthread_kill(user->_broad_tid, SIGINT);
         free(user->_broad_tid);
         set_user_board_thread(user, 0);
+
+        pthread_mutex_unlock(mutex);
+        free(user->_mutex); 
+        return 0;
+    }
+    else {
+        return -1;
     }
 }
 
@@ -418,14 +432,9 @@ int user_free(User* user)
     {
         ConnectManager *cm_ctx = get_user_connect_manager(user);
 
-        // 메시지 리시버가 동작중이라면, 메시지 리시버에 대한 쓰레드 연결을 헤제해줍니다.
-        // 이후, 메시지 리시버에 대한 연결을 헤제합니다.
-        user_broad_free(user);
-
         int alloc = user->_alloc;
         
-        conn_ctx_free(user->conn);
-        free(user->_mutex);        
+        conn_ctx_free(user->conn);       
         free(user->_tid);
         free(user);
         
@@ -449,11 +458,15 @@ void start_communicate_broadcast_user(User* user, SOCKET_HANDLE user_sd, struct 
     SSLContext* server_broad_ssl_ctx = get_conn_ssl_context(server_cm_ctx->_server_attr_ctx);
     SSL* ssl_user_sd = SSL_new(get_ssl_ctx_context(server_broad_ssl_ctx));
 
+    char* ip = inet_ntoa(((struct sockaddr_in *)addr)->sin_addr);
+
     SSL_set_fd(ssl_user_sd, user_sd);
     SSL_set_accept_state(ssl_user_sd);
 
     if ( SSL_accept(ssl_user_sd) == -1 ) {
         ERR_print_errors_fp(stderr);
+        output_message(MSG_ERROR, NULL, get_connect_manager_of_message_mutex(server_cm_ctx), "Failed to accept the ssl session, from: %s\n", ip);
+        return;
     }
 
     Connection* broad_conn = connection_create(server_broad_ssl_ctx);
@@ -464,7 +477,7 @@ void start_communicate_broadcast_user(User* user, SOCKET_HANDLE user_sd, struct 
 
     set_conn_ssl_session(broad_conn, ssl_user_sd);
     set_conn_status(broad_conn, USER_STATUS_CONNECTION_ESTATISHED);
-    set_conn_ip_addr(broad_conn, inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
+    set_conn_ip_addr(broad_conn, ip);
 
     user->_broad_conn = broad_conn;
     user->_broad_tid = thread;
@@ -689,6 +702,7 @@ bool connect_manager_execute(ConnectManager* ctx, char* host_ip, int port)
     ctx->_message_mutex = message_mutex;
     ctx->_mutex = mutex;
     ctx->_tid = thread;
+    
     // 유저에 대한 여유 할당 추가
     ctx->_user_arr = (User **)malloc(sizeof(User*) * ((MAX_USER_CONNECTION + 1) + 64));
 

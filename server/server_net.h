@@ -90,7 +90,7 @@ bool              is_user_joined_server(User* user);
 // prevent_shutdown은 SSL_Shutdown에 대한 호출 여부를 결정합니다.
 bool              user_disconnect(User* user, bool prevent_shutdown);
 
-int               user_broad_free(User* user);
+int               user_broad_disconnect(User* user);
 
 /**
  * @brief 유저 데이터에 대한 할당을 헤제합니다.
