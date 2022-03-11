@@ -50,11 +50,11 @@ SSL* establish_ssl(SSL_CTX* ctx, int socket)
 
     SSL_set_connect_state(ssl);
     
+    signal(SIGPIPE, SIG_IGN);
     int err = SSL_connect(ssl);
     if ( err == -1 )
     {    
-        ERR_print_errors_fp(stderr);
- 
+        output_message(MSG_ERROR, NULL, NULL, "서버가 연결을 거부했습니다. 인증이 완료되었습니까?\n");
     }
     return ssl;
 }
@@ -95,8 +95,14 @@ int execute_client_manager(Connection* conn, pthread_mutex_t* proc_mutex, pthrea
         return -1;
     }
     else {
-        output_message(MSG_INFO, conn, message_mutex, "서버 검증 응답: %s\n", buf);
+        output_message(MSG_INFO, conn, message_mutex, "클라이언트에 대한 검증 응답: %s\n", buf);
     }
+
+    output_message(MSG_INFO, NULL, message_mutex, "사용 가능한 명령어 안내: \n", buf);
+    output_message(MSG_INFO, NULL, message_mutex, "/name <닉네임> : 닉네임을 변경합니다. \n", buf);
+    output_message(MSG_INFO, NULL, message_mutex, "/status : 현재 접속한 유저 정보를 출력합니다. \n", buf);
+    output_message(MSG_INFO, NULL, message_mutex, "/send <닉네임> <메시지...> : 특정 유저에게 메시지를 보냅니다. (1:1)\n", buf);
+    output_message(MSG_INFO, NULL, message_mutex, "/exit : 채팅 서버에서 나갑니다. 이 때, 메시지 수신기는 자동 종료됩니다. \n", buf);
 
     while (1)
     {
