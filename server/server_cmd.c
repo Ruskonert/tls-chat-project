@@ -74,12 +74,13 @@ int cmd_broadcast_message(void* ctx, Message* message)
         if(! is_user_joined_server(o_user)) continue;
         
         pthread_t thread;
-
         struct broad_arg_t* a_list = (struct broad_arg_t*)malloc(sizeof(struct broad_arg_t));
 
         a_list->user = o_user;
         a_list->message = s_message;
+
         pthread_create(&thread, NULL, broad_send_message, (void*)a_list);
+        pthread_detach(thread);
     }
     return RESPONSE_CONN_OK;
 }

@@ -316,6 +316,7 @@ UserContext* start_communicate_user(ConnectManager* ctx, SOCKET_HANDLE user_sd, 
         printf("Generating thread was failed!\n");
         return (UserContext*)-1;   
     }
+    pthread_detach(*thread);
     return user;
 }
 
@@ -408,6 +409,8 @@ int user_broad_disconnect(UserContext* user)
 
         // 클라이언트의 메세지 수신기 연결을 대기하고 있는 쓰레드 작업을 종료합니다.
         pthread_kill(user->_broad_tid, SIGINT);
+        pthread_detach(user->_broad_tid);
+
         free(user->_broad_tid);
         set_user_board_thread(user, 0);
 
