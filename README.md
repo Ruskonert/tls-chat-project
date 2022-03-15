@@ -114,40 +114,48 @@ Packing Message의 길이는 총 16,384바이트의 길이를 가지며, 4바이
 | <code>Makefile</code> | 프로젝트 컴파일을 위한 make 파일입니다. |
 
 # 설치 및 컴파일
-서버 및 클라이언트(콘솔) 컴파일 방안은 다음과 같습니다.
+서버 및 클라이언트(콘솔) 컴파일 방안은 다음과 같습니다. 선행 패키지로 cmake, gcc libssl-dev가 필요합니다.
+
 ```shell
+# install libssl-dev cmake
+sudo apt-get install libssl-dev cmake gcc
+
 # complie and install openssl
 git clone https://github.com/openssl/openssl.git
+git clone https://github.com/json-c/json-c.git
 cd openssl
 ./Configure --prefix=/usr/local
 make
 make install
 
+# complie and install json-c
+cd ../json-c
+mkdir builds
+cd builds
+cmake ../
+make
+make install
+
+cd ..
+
+
 # linking 64 bit-based library file
 ldconfig /usr/local/lib64 (required sudo mode)
 
-# install libssl-dev
-sudo apt-get install libssl-dev
-
 # cd ~/tls-chat-example
 make
-```
-웹 클라이언트 실행을 위한 설치 방안은 다음과 같습니다.
-```shell
-cd web-client
-
 ```
 
 # 사용 방법
 ```shell
 # 서버를 실행합니다. 포트 값을 입력하지 않으면 기본 포트는 4433입니다.
 # 메세지 수신기는 8443번 포트를 사용합니다.
-sudo ./proc_server <port>
+sudo ./proc_server <host_ip> <port>
 
-# 클라이언트를 실행합니다. 포트 값을 입력하지 않으면 기본 포트는 4433입니다.
+# 클라이언트(메시지 송신기)를 실행합니다. 포트 값을 입력하지 않으면 기본 포트는 4433입니다.
 # proc_recv는 메시지를 받기 위한 메시지 수신기(수신 프로그램)입니다.
-./proc_recv <host_ip> <port>
-./proc_client <host_ip> <port>
+./proc_client <remote_ip> 
+./proc_recv <remote_ip> <port>
 ```
 
 # 이슈 사항 정리
