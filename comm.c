@@ -5,6 +5,10 @@
  * @version 1.0
  * @date 2022-02-15
  */
+
+#include <string.h>
+#include <sys/socket.h>
+
 #include "comm.h"
 #include "connection.h"
 #include "util.h"
@@ -285,7 +289,10 @@ bool disconnect(Connection* conn, pthread_mutex_t* connection_mutex, bool safety
     SSL_free(session);
 
     SOCKET_HANDLE sd = get_conn_socket_id(conn);
-    if(sd > 0) close(get_conn_socket_id(conn));
+    if(sd > STDIN_FILENO) {
+        shutdown(sd, SHUT_RDWR);
+        close(sd);
+    }
 
     set_conn_status(conn, USER_STATUS_DISCONNECTED);
 

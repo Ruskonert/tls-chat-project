@@ -382,7 +382,7 @@ bool user_disconnect(UserContext* user, bool safety_shutdown)
 }
 
 
-int user_broad_disconnect(UserContext* user)
+int user_broad_disconnect(UserContext* user, bool shutdown)
 {
     ConnectManager *cm_ctx = get_user_broad_connect_manager(user);
 
@@ -397,7 +397,7 @@ int user_broad_disconnect(UserContext* user)
 
             pthread_mutex_unlock(mutex);
 
-            disconnect(user->_broad_conn, mutex, true);
+            disconnect(user->_broad_conn, mutex, shutdown);
             
             output_message(MSG_CONNECTION, user->_broad_conn, user->cm_ctx->_mutex, "Broadcast client was disconnected by chat server\n");
 
@@ -412,7 +412,7 @@ int user_broad_disconnect(UserContext* user)
         pthread_detach(user->_broad_tid);
 
         free(user->_broad_tid);
-        set_user_board_thread(user, 0);
+        user->_broad_tid = 0;
 
         pthread_mutex_unlock(mutex);
         free(user->_mutex); 
@@ -476,6 +476,7 @@ void start_communicate_broadcast_user(UserContext* user, SOCKET_HANDLE user_sd, 
     pthread_mutex_init(mutex, NULL);
 
     set_conn_ssl_session(broad_conn, ssl_user_sd);
+    set_conn_socket_id(broad_conn, user_sd);
     set_conn_status(broad_conn, USER_STATUS_CONNECTION_ESTATISHED);
     set_conn_ip_addr(broad_conn, ip);
 
@@ -550,6 +551,15 @@ int create_broad_session_job (ConnectManager* server_ctx, char* host_ip, int por
 
                 // IP가 일치하면, 현재 클라이언트가 연결되어 있음을 의미합니다.
                 if(strcmp(ip, user_ip) == 0) {
+                    
+                    // 이것이 실행되면 수신기가 이미 연결되어 있는 상태입니다.
+                    // 기존 수신기를 끊습니다.
+                    if(o_user->_broad_tid != 0) {
+                        output_message(MSG_CONNECTION, NULL, broad_cm_ctx->_message_mutex, "This user already connected broadcasting client, re-connecting\n");
+                        set_broad_suspend(o_user);
+                        pthread_mutex_unlock(get_user_mutex(o_user));
+                    }
+
                     user = o_user;
                     user->broad_cm_ctx = broad_cm_ctx;
                     start_communicate_broadcast_user(user, user_sd, (struct sockaddr*)&user_addr);

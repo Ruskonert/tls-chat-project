@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
 
     SSL* ssl = establish_ssl(get_ssl_ctx_context(ctx), socket_id);
     set_conn_ssl_session(conn, ssl);
+    set_conn_socket_id(conn, socket_id);
 
 
     execute_client_manager(conn, &socket_mutex, &message_mutex);

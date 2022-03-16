@@ -46,6 +46,7 @@ int main(int argc, char* argv[])
 
     SSL* user_session = establish_ssl(get_ssl_ctx_context(ctx), socket_id);
     set_conn_ssl_session(conn, user_session);
+    set_conn_socket_id(conn, socket_id);
 
 
     pthread_mutex_init(&message_mutex, NULL);
@@ -97,10 +98,7 @@ int main(int argc, char* argv[])
         free(msg);
     }
 
-    SSL_shutdown(user_session);
-    SSL_free(user_session);
-
-    close(socket_id);
+    disconnect(conn, &socket_mutex, true);
 
     SSL_CTX_free(get_ssl_ctx_context(ctx));
     return 0;

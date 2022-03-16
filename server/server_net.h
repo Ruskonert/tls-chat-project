@@ -87,13 +87,13 @@ bool              is_user_joined_server(UserContext* user);
 
 
 // 유저 데이터를 통해 클라이언트의 정보를 읽어들어 서버와의 연결을 끊습니다.
-// prevent_shutdown은 SSL_Shutdown에 대한 호출 여부를 결정합니다.
-bool              user_disconnect(UserContext* user, bool prevent_shutdown);
+// shutdown은 SSL_Shutdown에 대한 호출 여부를 결정합니다.
+bool              user_disconnect(UserContext* user, bool shutdown);
 
 
 // 유저  데이터를 통해 클라이언트의 정보를 읽어들어 브로드캐스트 서버와의 연결을 끊습니다.
 // 브로드캐스트 서버와 연결되어 있지 않으면 이 작업은 무시됩니다.
-int               user_broad_disconnect(UserContext* user);
+int               user_broad_disconnect(UserContext* user, bool shutdown);
 
 /**
  * @brief 유저 데이터에 대한 할당을 헤제합니다.

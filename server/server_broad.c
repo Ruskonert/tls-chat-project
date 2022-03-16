@@ -86,7 +86,6 @@ void* communicate_broad_user(void* argv)
     set_conn_status(broad_conn, USER_STATUS_JOINED_SERVER);
     show_certs(ctx, user_broad_session);
     
-    signal(SIGPIPE, SIG_IGN);
 
     while(get_conn_status(broad_conn) != USER_STATUS_SUSPEND) {
 
@@ -102,6 +101,7 @@ void* communicate_broad_user(void* argv)
             break;
         }
         else {
+            signal(SIGPIPE, SIG_IGN);
 
             pthread_mutex_unlock(broad_mutex);
 
@@ -114,6 +114,9 @@ void* communicate_broad_user(void* argv)
                 output_message(MSG_ERROR, conn, message_mutex, "Broadcast TLS Connection Failed, Reason: %s\n", ERR_error_string(error, NULL));
                 set_conn_status(broad_conn, USER_STATUS_SUSPEND);
                 pthread_mutex_unlock(user_mutex);
+
+                user_broad_disconnect(ctx, false);
+                return -1;
             }
 
             else {
@@ -121,10 +124,13 @@ void* communicate_broad_user(void* argv)
                 
                 // 패킷 규격에 맞지 않는 비정상적인 패킷인지 검증합니다.
                 if( __builtin_expect(msg == (Message*)-1, 0)) {
-                    output_message(MSG_CONNECTION, conn, message_mutex, "Broadcast forcibly disconnected, packet validation failed\n");
+                    output_message(MSG_CONNECTION, conn, message_mutex, "Broadcast TLS connection forcibly disconnected, packet validation failed\n");
                     send_response_code(RESPONSE_CONN_BYE, conn, broad_mutex);
                     set_conn_status(broad_conn, USER_STATUS_SUSPEND);
                     pthread_mutex_unlock(user_mutex);
+
+                    user_broad_disconnect(ctx, false);
+                    return -1;
                 }
 
                 if(!packing_message_command_type(msg) == CMD_BROADCASE_MESSAGE) {
@@ -135,5 +141,6 @@ void* communicate_broad_user(void* argv)
             }
         }
     }
+    user_broad_disconnect(ctx, true);
     return 0;
 }

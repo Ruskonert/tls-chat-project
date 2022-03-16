@@ -94,7 +94,11 @@ void* communicate_user(void* argv)
         }
     }
 
-    user_broad_disconnect(ctx);
+    if(get_user_board_thread(ctx) != 0) {
+        set_broad_suspend(ctx);
+        pthread_mutex_unlock(get_user_mutex(ctx));
+    }
+    
     user_disconnect(ctx, true);
     return (void*)0;
 }
